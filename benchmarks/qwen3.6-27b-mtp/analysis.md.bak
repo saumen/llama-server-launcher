@@ -1,0 +1,229 @@
+# MTP Speculative Decoding Benchmark Analysis — unsloth/Qwen3.6-27B-Q6_K
+
+**Date:** 2026-05-22
+**Model:** unsloth/Qwen3.6-27B-Q6_K (GGUF)
+**Context Window:** 50,000 tokens
+**Temperature:** 0.3 | **Top-p:** 0.9 | **Top-k:** 20
+**KV Cache:** q8_0 (K/V unified), except where noted
+**Parallelism:** 4 | **Cont-batching:** enabled
+**Prompt:** 759 tokens
+
+---
+
+## 1. Executive Summary
+
+Speculative decoding with MTP (Multi-Token Prediction) delivers a **121.6% throughput improvement** over no speculation on this model, peaking at **19.07 tok/s** with `spec-draft-n-max = 5`.
+
+Key findings:
+
+| Finding | Detail |
+|---------|--------|
+| **Best throughput** | 19.07 tok/s at n=5 (MTP only), up from 8.60 tok/s baseline |
+| **Diminishing returns** | n=6 drops to 18.30 tok/s despite higher effective tokens per draft |
+| **N-gram simple adds overhead** | n=4 with ngram-simple (18.51 tok/s) is worse than n=3 alone (18.79 tok/s); n=6+ngram (17.75 tok/s) is worse than n=6 alone (18.30 tok/s) |
+| **N-gram mod is inert** | Produced 0 accepted drafts out of 841 calls — entirely useless on this model |
+| **Acceptance degrades predictably** | 76.0% at n=2 → 43.0% at n=6 |
+| **Sweet spot** | `spec-draft-n-max = 5` with `spec-type = draft-mtp` only |
+
+---
+
+## 2. Configuration Matrix
+
+| Run | Config | Throughput | Draft Acceptance | Eff. Toks/Draft | Total Toks | Prompt Eval (ms) | KV Cache |
+|-----|--------|-----------:|:----------------:|:---------------:|:----------:|:----------------:|:--------:|
+| Baseline | no speculation | **8.60** tok/s | — | — | 3,065 | 1,257.57 | q8_0 |
+| MTP | n=2, draft-mtp | 17.56 tok/s | 76.0% | 1.52 | 4,303 | 1,516.93 | q8_0 |
+| MTP+ngram-mod | n=6, draft-mtp+ngram-mod | 18.27 tok/s | 42.6% | 2.56 | 2,992 | 1,703.64 | f16 |
+| MTP+ngram-simple | n=4, draft-mtp+ngram-simple | 18.51 tok/s | 53.1% | 2.12 | 2,929 | 1,665.35 | q8_0 |
+| Run A | n=3, draft-mtp | 18.79 tok/s | 63.4% | 1.90 | 3,191 | 1,513.71 | q8_0 |
+| **Run B** | **n=5, draft-mtp** | **19.07 tok/s** | **50.0%** | **2.50** | **3,573** | **1,548.89** | **q8_0** |
+| Run C | n=6, draft-mtp | 18.30 tok/s | 43.0% | 2.58 | 3,132 | 1,557.05 | q8_0 |
+| Run D | n=6, draft-mtp+ngram-simple | 17.75 tok/s | 40.5% | 2.58 | 2,539 | 1,544.58 | q8_0 |
+
+> **Note:** "Total Toks" refers to decoded (generated) tokens during the eval phase. Prompt tokens = 759 across all runs.
+>
+> **Throughput improvement over baseline:** MTP n=2 (+104.2%), MTP+ngram-mod n=6 (+112.4%), MTP+ngram-simple n=4 (+115.2%), Run A n=3 (+118.5%), **Run B n=5 (+121.6%)**, Run C n=6 (+112.8%), Run D n=6+ngram (+106.4%).
+
+---
+
+## 3. Acceptance Rate vs. Depth Curve
+
+Draft acceptance rate degrades monotonically as the draft depth `n` increases:
+
+| Draft Depth (n) | Acceptance Rate | Accepted / Generated | Source |
+|:---------------:|:---------------:|:--------------------:|:------:|
+| 2 | **76.0%** | 2,595 / 3,414 | MTP baseline run |
+| 3 | **63.4%** | 2,091 / 3,297 | Run A |
+| 5 | **50.0%** | 2,554 / 5,110 | Run B |
+| 6 | **43.0%** | 2,260 / 5,250 | Run C |
+
+```
+Acceptance Rate
+100% ┤
+ 90% ┤
+ 80% ┤ ●
+ 70% ┤
+ 60% ┤      ●
+ 50% ┤              ●
+ 40% ┤                    ●
+ 30% ┤
+ 20% ┤
+ 10% ┤
+  0% ┤──┬────┬────┬────┬───
+      2    3    4    5    6   Draft Depth (n)
+```
+
+**Observation:** The acceptance rate follows a roughly linear decline of ~8–9 percentage points per additional draft token. This is consistent with the expected behavior of speculative decoding: each additional token in a draft sequence compounds the probability of disagreement between the draft and target models.
+
+---
+
+## 4. Effective Tokens per Draft Analysis
+
+Effective tokens per draft measures the average number of tokens accepted per draft invocation. This is computed as `acceptance_rate × n`:
+
+| Draft Depth (n) | Acceptance Rate | Eff. Toks/Draft | Source |
+|:---------------:|:---------------:|:---------------:|:------:|
+| 2 | 76.0% | **1.52** | MTP baseline run |
+| 3 | 63.4% | **1.90** | Run A |
+| 4 | 53.1% | **2.12** | MTP+ngram-simple n=4 |
+| 5 | 50.0% | **2.50** | Run B |
+| 6 | 43.0% | **2.58** | Run C |
+
+```
+Effective Tokens per Draft
+3.0 ┤                                    ●
+2.5 ┤                       ●     ●
+2.0 ┤             ●
+1.5 ┤  ●
+1.0 ┤
+0.5 ┤
+0.0 ┤──┬────┬────┬────┬────┬───
+     2    3    4    5    6
+          Draft Depth (n)
+```
+
+### Why n=6 Has the Highest Effective Tokens but Not the Best Throughput
+
+At n=6, the effective tokens per draft (2.58) exceeds that of n=5 (2.50), meaning more draft tokens are accepted on average per invocation. However, throughput at n=5 (19.07 tok/s) still exceeds n=6 (18.30 tok/s) by 4.2%.
+
+**The reason is verification overhead.** In speculative decoding, the main model must verify all draft tokens (accepted or rejected) in a single forward pass. As `n` increases:
+
+1. **More computation per verification step:** Each verification pass processes `n` tokens instead of 1, increasing memory bandwidth pressure and computation.
+2. **Higher rejection penalty:** Even though more tokens are accepted, the remaining rejected tokens still consume verification compute. At n=6, 57% of draft tokens are rejected — those are "wasted" verification cycles.
+3. **Diminishing parallelism gain:** The speedup formula for speculative decoding is roughly `(1 + (n-1) × acceptance_rate)`. At n=5: `1 + 4 × 0.50 = 3.0×`. At n=6: `1 + 5 × 0.43 = 3.15×`. The marginal gain (3.15 vs 3.00) does not offset the increased per-step latency.
+
+This is a classic tradeoff: **higher effective tokens per draft does not guarantee higher throughput** — the per-step latency must remain low enough to make the increased draft length worthwhile.
+
+---
+
+## 5. N-gram Analysis
+
+### MTP-only vs. MTP+ngram at Equivalent Depth
+
+| Configuration | Throughput | Draft Acceptance | Total Toks | Prompt Eval (ms) |
+|--------------|-----------:|:----------------:|:----------:|:----------------:|
+| MTP n=6 only (Run C) | **18.30** tok/s | 43.0% | 3,132 | 1,557.05 |
+| MTP+ngram-simple n=6 (Run D) | 17.75 tok/s | 40.5% | 2,539 | 1,544.58 |
+| **Degradation** | **−3.0%** | −2.5pp | −19.0% | −0.8% |
+
+Adding `ngram-simple` at n=6 **reduces** throughput by 3.0% despite adding a second draft source. The ngram-simple statistics reveal why:
+
+```
+ngram-simple: #calls(b,g,a) = 1  722     16
+              #gen drafts =    16
+              #acc drafts =    16
+              #gen tokens =   256
+              #acc tokens =    81
+```
+
+- Only 16 of 722 ngram calls produced valid drafts (2.2% call rate)
+- Of those 16, all 81 produced tokens were accepted — but that's only 81 extra accepted tokens
+- MTP alone produced 2,260 accepted tokens
+- **ngram-simple contributed just 3.6% of total accepted tokens** while adding overhead
+
+### N-gram Mod: Completely Inert
+
+The `ngram-mod` configuration (with `n-match = 24`, `n-min = 48`, `n-max = 64`) produced **zero accepted drafts**:
+
+```
+ngram-mod: #calls(b,g,a) = 1  841      0
+           #gen drafts =      0
+           #acc drafts =      0
+           #gen tokens =      0
+           #acc tokens =      0
+```
+
+The minimum frequency threshold (`n-min = 48`) appears too restrictive for this model's text patterns, rendering the ngram-mod component entirely dead code during inference.
+
+### Summary: N-gram Impact
+
+| Metric | MTP-only (n=6) | +ngram-simple | +ngram-mod |
+|--------|:--------------:|:-------------:|:----------:|
+| Throughput | 18.30 tok/s | 17.75 tok/s (−3.0%) | 18.27 tok/s (−0.2%) |
+| MTP acceptance | 43.0% | 40.5% | 42.6% |
+| Extra accepted tokens | — | +81 | 0 |
+| Added prompt eval overhead | — | +0.8% | +9.3%* |
+
+> \* ngram-mod also used f16 KV cache instead of q8_0, so part of the overhead is from cache precision, not ngram itself.
+
+**Conclusion:** N-gram supplementation provides negligible to negative benefit on this model. The MTP drafts are sufficiently accurate that the lightweight ngram approach adds overhead without meaningful gains.
+
+---
+
+## 6. Recommendation
+
+### Optimal Configuration
+
+```ini
+spec-type = draft-mtp
+spec-draft-n-max = 5
+```
+
+### Rationale
+
+1. **Peak throughput at n=5:** 19.07 tok/s, representing a 121.6% improvement over the no-speculation baseline of 8.60 tok/s.
+
+2. **Acceptance rate still healthy at 50%:** Half of all draft tokens are accepted, providing a clean 2× theoretical speedup factor. This is high enough to justify the verification overhead of 5-token draft sequences.
+
+3. **n=6 offers no throughput advantage:** Despite higher effective tokens per draft (2.58 vs 2.50), the increased verification cost of processing 6-token sequences brings throughput down to 18.30 tok/s (−4.2%). The marginal gain in draft acceptance compensation (43% vs 50%) does not offset the per-step latency.
+
+4. **No benefit from ngram augmentation:** Both ngram-simple and ngram-mod add overhead without meaningful throughput improvement. At n=5, the MTP component alone achieves the best balance of draft quality and verification efficiency.
+
+5. **Simpler is better:** A single draft source (`draft-mtp`) reduces configuration complexity, debugging surface area, and runtime overhead compared to hybrid approaches.
+
+### Tuning for Different Latency Tolerances
+
+| Goal | Configuration | Expected Throughput |
+|------|--------------:|--------------------:|
+| **Maximum throughput** | `spec-draft-n-max = 5` | ~19 tok/s |
+| **Lower latency, stable throughput** | `spec-draft-n-max = 3` | ~18.8 tok/s |
+| **Maximum draft quality** | `spec-draft-n-max = 2` | ~17.6 tok/s |
+| **Baseline (no speculation)** | *(no spec-type)* | 8.6 tok/s |
+
+---
+
+## 7. Future Exploration
+
+If throughput above 25 tok/s is needed, the current MTP-only approach has likely reached its practical ceiling on this hardware/configuration. The remaining bottleneck is the main model's per-token verification cost, which speculative decoding cannot reduce below 1×.
+
+**Potential paths to 25+ tok/s:**
+
+1. **Lightweight external draft model:** A small dedicated draft model (0.5B–1.5B parameters in GGUF format) could provide higher-acceptance drafts than MTP. The MTP architecture shares weights with the main model and predicts tokens autoregressively from the same context, which limits its acceptance rate. A purpose-built draft model trained specifically for token prediction could achieve acceptance rates above 60% even at n=5, translating to throughput well above 20 tok/s.
+
+2. **KV cache optimization:** The current runs reuse 685–1086 graphs. Investigating whether more aggressive KV cache eviction policies or cache compaction could reduce memory bandwidth pressure during the verification step may yield 1–3 tok/s improvements.
+
+3. **Model quantization:** Moving from Q6_K to Q5_K or Q4_K could reduce memory bandwidth pressure, potentially improving both the main model verification speed and the MTP forward passes. This should be tested against quality degradation.
+
+4. **Parallel draft verification:** If llama.cpp supports batching multiple draft verification passes, this could amortize the per-step overhead and push n=5 or n=6 throughput above the current ceiling.
+
+---
+
+## Appendix: Raw Data Sources
+
+| File | Configuration |
+|------|--------------|
+| `benchmark-unsloth-qwen3.6-27B-Q6_K.md` | No speculation, MTP n=2, MTP+ngram-mod n=6, MTP+ngram-simple n=4 |
+| `benchmarks/run-a.md` | MTP n=3 |
+| `benchmarks/run-b.md` | MTP n=5 |
+| `benchmarks/run-c.md` | MTP n=6 |
+| `benchmarks/run-d.md` | MTP+ngram-simple n=6 |

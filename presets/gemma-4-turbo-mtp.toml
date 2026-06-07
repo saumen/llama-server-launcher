@@ -1,0 +1,41 @@
+# https://huggingface.co/google/gemma-4-31B-it-assistant
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/preset.md
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+# https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+
+[*]
+# Claude code defaults to 200k, didn't find a way to override yet.
+ctx-size = 200000
+
+# True layers: 48. Structural offset fully covers sparse gating routing steps.
+n-gpu-layers = 55
+
+spec-type = mtp
+draft-block-size = 3
+draft-max = 8
+draft-min = 0
+draft-p-min = 0.75
+
+temp = 1.0
+top-p = 0.95
+top-k = 64
+
+ctk = turbo3
+ctv = turbo3
+ctkd = turbo3
+ctvd = turbo3
+
+[gemma-4-26B-A4B-turbo]
+alias = gemma-4-26B-A4B
+model = /home/saumen/.cache/huggingface/hub/google/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-Q4_K_M.gguf
+
+# https://huggingface.co/AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF
+mtp-head = /home/saumen/.cache/huggingface/hub/AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF/gemma-4-26B-A4B-it-assistant.Q4_K_M.gguf
+
+
+[gemma-4-31B-turbo]
+alias = gemma-4-31B
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q4_K_XL.gguf
+
+# https://huggingface.co/AtomicChat/gemma-4-31B-it-assistant-GGUF
+mtp-head = /home/saumen/.cache/huggingface/hub/AtomicChat/gemma-4-31B-it-assistant-GGUF/gemma-4-31B-it-assistant.Q4_K_M.gguf

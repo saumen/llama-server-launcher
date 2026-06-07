@@ -15,7 +15,19 @@ alias = gemma-4-26B-A4B
 # Claude code defaults to 200k, didn't find a way to override yet.
 ctx-size = 200000
 
-# TODO: specify a draft model
+# True layers: 48. Structural offset fully covers sparse gating routing steps.
+n-gpu-layers = 55
+
+temp = 1.0
+top-p = 0.95
+top-k = 64
+
+[google/gemma-4-31B]
+# model = /home/saumen/.lmstudio/models/google/gemma-4-31B-it-GGUF/gemma-4-31B-it-Q4_K_M.gguf
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q4_K_XL.gguf
+alias = gemma-4-31B
+# Claude code defaults to 200k, didn't find a way to override yet.
+ctx-size = 200000
 
 # True layers: 48. Structural offset fully covers sparse gating routing steps.
 n-gpu-layers = 55
@@ -23,6 +35,7 @@ n-gpu-layers = 55
 temp = 1.0
 top-p = 0.95
 top-k = 64
+
 
 [unsloth/gemma-4-12B]
 model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-12B-it-GGUF/gemma-4-12b-it-UD-Q8_K_XL.gguf

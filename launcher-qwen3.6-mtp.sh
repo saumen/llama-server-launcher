@@ -40,8 +40,6 @@
   --port 8080 \
   --models-max 2 \
   --flash-attn on \
-  --cache-type-k q8_0 \
-  --cache-type-v q8_0 \
   --cont-batching \
   --no-mmproj \
   --log-colors on \

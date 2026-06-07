@@ -12,9 +12,12 @@ model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6
 alias = Qwen3.6-27B
 ctx-size = 70000
 
+# Dense model: f16 KV cache avoids q8_0 dequant bottleneck in attention.
+cache-type-k = f16
+cache-type-v = f16
+
 # True layers: 64. Offset allocated cleanly to cover attention-heads + MTP components.
 n-gpu-layers = 70
-
 spec-type = draft-mtp
 spec-draft-n-max = 2
 draft-p-min = 0.50
@@ -29,6 +32,10 @@ top-k = 20
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
 alias = Qwen3.6-35B-A3B
 ctx-size = 70000
+
+# MoE model: q8_0 KV cache is fine — MoE routing is the bottleneck, not KV dequant.
+cache-type-k = q8_0
+cache-type-v = q8_0
 
 # True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
 n-gpu-layers = 50

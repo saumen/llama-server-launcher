@@ -1,0 +1,44 @@
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/preset.md
+# https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
+# https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+
+################################################################################
+# Set model specific settings in the presets.
+# Set global settings in the `launcher.sh`
+################################################################################
+
+[unsloth/Qwen3.6-27B-MTP]
+model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q4_K_XL.gguf
+alias = Qwen3.6-27B
+ctx-size = 70000
+
+# True layers: 64. Offset allocated cleanly to cover attention-heads + MTP components.
+n-gpu-layers = 70
+
+spec-type = draft-mtp
+spec-draft-n-max = 2
+draft-p-min = 0.50
+
+temp = 0.3
+top-p = 0.9
+top-k = 20
+
+################################################################################
+
+[unsloth/qwen3.6-35B-A3B-MTP]
+model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
+alias = Qwen3.6-35B-A3B
+ctx-size = 70000
+
+# True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
+n-gpu-layers = 50
+
+# benchmarks/qwen3.6-35b-a3b/pdf-analysis-benchmarks-02/analysis-report.md
+spec-type = draft-mtp
+spec-draft-n-max = 3
+draft-p-min = 0.50
+
+temp = 0.6
+top-p = 0.95
+
+################################################################################

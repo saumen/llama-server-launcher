@@ -100,6 +100,6 @@ else
     # Show tree of downloaded models (only when not dry-run)
     if [[ "$DRY_RUN" != "true" ]]; then
         echo "=== Downloaded model tree ==="
-        tree unsloth AtomicChat google RachidAR 2>/dev/null || true
+        find /home/saumen/.cache/huggingface/hub -name "*.gguf" | sed 's/.*hub\///g' | sort
     fi
 fi

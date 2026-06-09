@@ -6,7 +6,7 @@
 ~/workspace/github/ggml-org/2026-06-06_llama.cpp/llama.cpp/build/bin/llama-server \
     --host 0.0.0.0 \
     --port 8080 \
-    --models-preset ~/workspace/llama-server/presets/gemma-4-qat.toml \
+    --models-preset ~/workspace/llama-server/launchers/gemma-4-qat/gemma-4-qat.toml \
     --models-max 2 \
     --flash-attn on \
     --cont-batching \

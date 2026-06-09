@@ -32,8 +32,8 @@
 #        ./download-models.sh             (download all)
 #        ./download-models.sh <modelId>   (download single model)
 
-/home/saumen/workspace/github/ggml-org/2026-06-07/llama.cpp/build/bin/llama-server \
-  --models-preset ~/workspace/llama-server/presets/qwen3.6-catalog.toml \
+~/workspace/github/ggml-org/2026-06-07/llama.cpp/build/bin/llama-server \
+  --models-preset ~/workspace/llama-server/launchers/qwen3.6-mtp/qwen3.6-catalog.toml \
   --host 0.0.0.0 \
   --port 8080 \
   --models-max 2 \

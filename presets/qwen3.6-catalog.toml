@@ -33,9 +33,8 @@ model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwe
 alias = Qwen3.6-35B-A3B
 ctx-size = 70000
 
-# MoE model: q8_0 KV cache is fine — MoE routing is the bottleneck, not KV dequant.
-cache-type-k = q8_0
-cache-type-v = q8_0
+cache-type-k = f16
+cache-type-v = f16
 
 # True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
 n-gpu-layers = 50

@@ -1,82 +1,76 @@
 {
-  "cacheDir": "~/.cache/huggingface/hub",
+    "cacheDir": "~/.cache/huggingface/hub",
 
-  "models": [
-    {
-      "modelId": "unsloth/Qwen3.6-27B-MTP-GGUF",
-      "localDir": "unsloth/Qwen3.6-27B-MTP-GGUF",
-      "include": [
-        "*mmproj-F32*",
-        "*UD-Q4_K_XL.gguf",
-        "*UD-Q5_K_XL.gguf",
-        "*UD-Q6_K.gguf"
-      ]
-    },
-    {
-      "modelId": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-      "localDir": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-      "include": [
-        "*mmproj-F32*",
-        "*UD-Q4_K_XL.gguf",
-        "*UD-Q5_K_XL.gguf",
-        "*UD-Q6_K.gguf"
-      ]
-    },
-    {
-      "modelId": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
-      "localDir": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
-      "include": [
-        "gemma-4-26B_q4_0-it.gguf"
-      ]
-    },
-    {
-      "modelId": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
-      "localDir": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
-      "include": [
-        "*qat-UD-Q4_K_XL.gguf"
-      ]
-    },
-    {
-      "modelId": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
-      "localDir": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
-      "include": [
-        "*Q4_K_M.gguf"
-      ]
-    },
-    {
-      "modelId": "google/gemma-4-31B-it-qat-q4_0-gguf",
-      "localDir": "google/gemma-4-31B-it-qat-q4_0-gguf",
-      "include": [
-        "gemma-4-31B_q4_0-it.gguf"
-      ]
-    },
-    {
-      "modelId": "unsloth/gemma-4-31B-it-qat-GGUF",
-      "localDir": "unsloth/gemma-4-31B-it-qat-GGUF",
-      "include": [
-        "*qat-UD-Q4_K_XL.gguf"
-      ]
-    },
-    {
-      "modelId": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
-      "localDir": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
-      "include": [
-        "*Q4_K_M.gguf"
-      ]
-    },
-    {
-      "modelId": "unsloth/gemma-4-12B-it-GGUF",
-      "localDir": "unsloth/gemma-4-12B-it-GGUF",
-      "include": [
-        "*UD-Q8_K_XL.gguf"
-      ]
-    },
-    {
-      "modelId": "unsloth/GLM-4.7-Flash-GGUF",
-      "localDir": "unsloth/GLM-4.7-Flash-GGUF",
-      "include": [
-        "*UD-UD-Q5_K_XL.gguf"
-      ]
-    }
-  ]
+    "models": [
+        {
+            "modelId": "unsloth/Qwen3.6-27B-MTP-GGUF",
+            "localDir": "unsloth/Qwen3.6-27B-MTP-GGUF",
+            "include": ["*mmproj-F32*", "*UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf"]
+        },
+        {
+            "modelId": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+            "localDir": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+            "include": ["*mmproj-F32*", "*UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf"]
+        },
+        {
+            "modelId": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+            "localDir": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
+            "include": ["gemma-4-26B_q4_0-it.gguf"]
+        },
+        {
+            "modelId": "unsloth/gemma-4-26B-A4B-it-GGUF",
+            "localDir": "unsloth/gemma-4-26B-A4B-it-GGUF",
+            "include": ["gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf", "MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf"]
+        },
+        {
+            "modelId": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
+            "localDir": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
+            "include": ["*qat-UD-Q4_K_XL.gguf"]
+        },
+        {
+            "modelId": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
+            "localDir": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
+            "include": ["*Q4_K_M.gguf"]
+        },
+        {
+            "modelId": "google/gemma-4-31B-it-qat-q4_0-gguf",
+            "localDir": "google/gemma-4-31B-it-qat-q4_0-gguf",
+            "include": ["gemma-4-31B_q4_0-it.gguf"]
+        },
+        {
+            "modelId": "unsloth/gemma-4-31B-it-GGUF",
+            "localDir": "unsloth/gemma-4-31B-it-GGUF",
+            "include": ["*UD-Q4_K_XL.gguf", "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"]
+        },
+        {
+            "modelId": "unsloth/gemma-4-31B-it-qat-GGUF",
+            "localDir": "unsloth/gemma-4-31B-it-qat-GGUF",
+            "include": ["*qat-UD-Q4_K_XL.gguf", "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"]
+        },
+        {
+            "modelId": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
+            "localDir": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
+            "include": ["*Q4_K_M.gguf"]
+        },
+        {
+            "modelId": "unsloth/gemma-4-12B-it-GGUF",
+            "localDir": "unsloth/gemma-4-12B-it-GGUF",
+            "include": ["*UD-Q8_K_XL.gguf"]
+        },
+        {
+            "modelId": "unsloth/GLM-4.7-Flash-GGUF",
+            "localDir": "unsloth/GLM-4.7-Flash-GGUF",
+            "include": ["*UD-UD-Q5_K_XL.gguf"]
+        },
+        {
+            "modelId": "RachidAR/gemma-4-26B-A4B-it-qat-assistant-q4_0-gguf",
+            "localDir": "RachidAR/gemma-4-26B-A4B-it-qat-assistant-q4_0-gguf",
+            "include": ["gemma-4-26b-A4B-it-assistant-Q4_0.gguf"]
+        },
+        {
+            "modelId": "RachidAR/gemma-4-31B-it-qat-Q4_0-Q4emb-MTP-assistant-gguf",
+            "localDir": "RachidAR/gemma-4-31B-it-qat-Q4_0-Q4emb-MTP-assistant-gguf",
+            "include": ["gemma-4-31b-qat-it-assistant-Q4_0-Q4emb.gguf"]
+        }
+    ]
 }

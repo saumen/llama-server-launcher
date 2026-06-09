@@ -100,6 +100,6 @@ else
     # Show tree of downloaded models (only when not dry-run)
     if [[ "$DRY_RUN" != "true" ]]; then
         echo "=== Downloaded model tree ==="
-        tree unsloth AtomicChat google 2>/dev/null || true
+        tree unsloth AtomicChat google RachidAR 2>/dev/null || true
     fi
 fi

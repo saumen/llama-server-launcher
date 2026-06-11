@@ -63,14 +63,9 @@
             "include": ["*UD-UD-Q5_K_XL.gguf"]
         },
         {
-            "modelId": "RachidAR/gemma-4-26B-A4B-it-qat-assistant-q4_0-gguf",
-            "localDir": "RachidAR/gemma-4-26B-A4B-it-qat-assistant-q4_0-gguf",
-            "include": ["gemma-4-26b-A4B-it-assistant-Q4_0.gguf"]
-        },
-        {
-            "modelId": "RachidAR/gemma-4-31B-it-qat-Q4_0-Q4emb-MTP-assistant-gguf",
-            "localDir": "RachidAR/gemma-4-31B-it-qat-Q4_0-Q4emb-MTP-assistant-gguf",
-            "include": ["gemma-4-31b-qat-it-assistant-Q4_0-Q4emb.gguf"]
+            "modelId": "bartowski/nex-agi_Nex-N2-mini-GGUF",
+            "localDir": "bartowski/nex-agi_Nex-N2-mini-GGUF",
+            "include": ["nex-agi_Nex-N2-mini-Q5_K_M.gguf"]
         }
     ]
 }

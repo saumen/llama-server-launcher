@@ -1,7 +1,7 @@
 # https://github.com/ggml-org/llama.cpp/blob/master/docs/preset.md
 # https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
 # https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
-
+# https://unsloth.ai/docs/models/qwen3.6#recommended-settings
 ################################################################################
 # Set model specific settings in the presets.
 # Set server level settings in the `launcher.sh`
@@ -13,10 +13,21 @@ cache-type-v = f16
 
 spec-type = draft-mtp
 
-[unsloth/Qwen3.6-27B-MTP]
+################################################################################
+
+[unsloth/Qwen3.6-27B-MTP-NT]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q5_K_XL.gguf
-alias = Qwen3.6-27B
-ctx-size = 70000
+alias = Qwen3.6-27B-Flash
+ctx-size = 150000
+
+# Non-thinking, general tasks
+chat-template-kwargs = {"enable_thinking":false}
+temperature = 0.7
+top-p = 0.8
+top-k = 20
+min-p = 0.0
+presence-penalty = 1.5
+repeat-penalty = 1.0
 
 # True layers: 64. Offset allocated cleanly to cover attention-heads + MTP components.
 n-gpu-layers = 70
@@ -24,9 +35,49 @@ n-gpu-layers = 70
 spec-draft-n-max = 2
 draft-p-min = 0.50
 
-temp = 0.3
-top-p = 0.9
+################################################################################
+
+[unsloth/Qwen3.6-27B-MTP]
+model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q5_K_XL.gguf
+alias = Qwen3.6-27B
+ctx-size = 150000
+
+# Thinking, General tasks
+temperature = 1
+top-p = 0.95
 top-k = 20
+min-p = 0.0
+presence-penalty = 0.0
+repeat-penalty = 1.0
+
+# True layers: 64. Offset allocated cleanly to cover attention-heads + MTP components.
+n-gpu-layers = 70
+
+# speculative settings
+spec-draft-n-max = 2
+draft-p-min = 0.50
+
+################################################################################
+
+[unsloth/Qwen3.6-27B-MTP-Coder]
+model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q5_K_XL.gguf
+alias = Qwen3.6-27B-Coder
+ctx-size = 150000
+
+# Thinking, Coding tasks
+temperature = 0.6
+top-p = 0.95
+top-k = 20
+min-p = 0.0
+presence-penalty = 0.0
+repeat-penalty = 1.0
+
+# True layers: 64. Offset allocated cleanly to cover attention-heads + MTP components.
+n-gpu-layers = 70
+
+# speculative settings
+spec-draft-n-max = 2
+draft-p-min = 0.50
 
 ################################################################################
 
@@ -34,6 +85,14 @@ top-k = 20
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q5_K_XL.gguf
 alias = Qwen3.6-35B-A3B
 ctx-size = 150000
+
+# Thinking, General tasks
+temperature = 1
+top-p = 0.95
+top-k = 20
+min-p = 0.0
+presence-penalty = 0.0
+repeat-penalty = 1.0
 
 # True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
 n-gpu-layers = 50
@@ -51,12 +110,8 @@ model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwe
 alias = Qwen3.6-35B-A3B-Flash
 ctx-size = 150000
 
-# True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
-n-gpu-layers = 50
-
-spec-draft-n-max = 3
-draft-p-min = 0.50
-
+# Non-thinking, general tasks
+chat-template-kwargs = {"enable_thinking":false}
 temperature = 0.7
 top-p = 0.8
 top-k = 20
@@ -64,4 +119,8 @@ min-p = 0.0
 presence-penalty = 1.5
 repeat-penalty = 1.0
 
-chat-template-kwargs = {"enable_thinking":false}
+# True layers: 40. Buffers the routing matrices alongside sequential MTP predictors.
+n-gpu-layers = 50
+
+spec-draft-n-max = 3
+draft-p-min = 0.50

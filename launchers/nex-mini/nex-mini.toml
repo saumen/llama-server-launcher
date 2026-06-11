@@ -1,0 +1,16 @@
+[*]
+cache-type-k = f16
+cache-type-v = f16
+
+[bartowski/nex-agi_Nex-N2-mini]
+model = /home/saumen/.cache/huggingface/hub/bartowski/nex-agi_Nex-N2-mini-GGUF/nex-agi_Nex-N2-mini-Q5_K_M.gguf
+alias = Nex-N2-mini
+ctx-size = 70000
+
+n-gpu-layers = 40
+
+temp = 0.7
+top-p = 0.95
+top-k = 40
+
+chat-template-kwargs = {"enable_thinking":false}

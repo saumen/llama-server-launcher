@@ -36,7 +36,7 @@
   --models-preset ~/workspace/llama-server/launchers/qwen3.6-mtp/qwen3.6-catalog.toml \
   --host 0.0.0.0 \
   --port 8080 \
-  --models-max 2 \
+  --models-max 3 \
   --flash-attn on \
   --cont-batching \
   --no-mmproj \

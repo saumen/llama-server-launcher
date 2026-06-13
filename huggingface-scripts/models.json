@@ -20,7 +20,13 @@
         {
             "modelId": "unsloth/gemma-4-26B-A4B-it-GGUF",
             "localDir": "unsloth/gemma-4-26B-A4B-it-GGUF",
-            "include": ["gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf", "MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf"]
+            "include": [
+                "gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
+                "gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf",
+                "gemma-4-26B-A4B-it-UD-Q5_K_M.gguf",
+                "gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf",
+                "MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf"
+            ]
         },
         {
             "modelId": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",

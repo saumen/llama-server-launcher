@@ -2,10 +2,10 @@
 # https://github.com/ggml-org/llama.cpp/blob/master/docs/preset.md
 # https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md
 # https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+# ./gemma-4-model-routing.md
 
 [*]
-# Claude code defaults to 200k, didn't find a way to override yet.
-ctx-size = 70000
+ctx-size = 150000
 
 # True layers: 48. Structural offset fully covers sparse gating routing steps.
 n-gpu-layers = 55
@@ -19,15 +19,35 @@ cache-type-v = f16
 
 spec-type = draft-mtp
 draft-p-min = 0.50
-
-[google/gemma-4-26B-A4B-MTP]
-alias = gemma-4-26B-A4B
-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf
-spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
 spec-draft-n-max = 2
 
-[google/gemma-4-31B-MTP]
-alias = gemma-4-31B
-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-31B-it-GGUF/gemma-4-31B-it-UD-Q4_K_XL.gguf
-spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-31B-it-GGUF/MTP/gemma-4-31B-it-MTP-Q8_0.gguf
-spec-draft-n-max = 4
+chat-template-kwargs = {"enable_thinking":false}
+
+# Large-scale log analysis, mass data cleaning, automated scraping.
+# High-volume transcript/email processing.
+[google/gemma-4-flash-lite]
+alias = gemma-4-26B-A4B-Flash-Lite
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q4_K_M.gguf
+spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
+
+# Writing boilerplate, unit test generation, documentation drafting.
+# Slack/Email summarization, standup note generation.
+[google/gemma-4-flash]
+alias = gemma-4-26B-A4B-Flash
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf
+spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
+
+# Debugging race conditions, architectural refactoring, math proofs.
+# Budget forecasting, capacity planning.
+[google/gemma-4-flash-high]
+alias = gemma-4-26B-A4B-flash-high
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q5_K_M.gguf
+spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
+
+# Grammar/nuance correction, legal/medical polishing.
+# Codebase migration, regression testing.
+# Quarterly reviews, roadmap analysis.
+[google/gemma-4-pro]
+alias = gemma-4-26B-A4B-pro
+model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf
+spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf

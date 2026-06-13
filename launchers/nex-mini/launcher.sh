@@ -1,5 +1,5 @@
 ~/workspace/github/ggml-org/2026-06-07/llama.cpp/build/bin/llama-server \
-  --models-preset ~/workspace/llama-server/launchers/nex-mini/nex-mini.toml \
+  --models-preset ~/workspace/github/saumen/llama-server-launcher/launchers/nex-mini/nex-mini.toml \
   --host 0.0.0.0 \
   --port 8082 \
   --models-max 1 \

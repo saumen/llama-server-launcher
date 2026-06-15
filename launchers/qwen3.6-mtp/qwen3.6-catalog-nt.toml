@@ -24,31 +24,17 @@ spec-draft-n-max = 3
 draft-p-min = 0.50
 
 ########################################################################################################################
-# Qwen3.6-27B
-########################################################################################################################
-
-[unsloth/Qwen3.6-27B-UD-Q4_K_XL-MTP-NT]
-model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q4_K_XL.gguf
-alias = Qwen3.6-27B-Q4-IT
-
-########################################################################################################################
-
-[unsloth/Qwen3.6-27B-UD-Q5_K_XL-MTP-NT]
-model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q5_K_XL.gguf
-alias = Qwen3.6-27B-Q5-IT
-
-########################################################################################################################
 # Qwen3.6-35B-A3B
 ########################################################################################################################
 
 [unsloth/Qwen3.6-35B-A3B-UD-Q4_K_XL-MTP-NT]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
-alias = Qwen3.6-35B-A3B-Q4-IT
+alias = Qwen3.6-35B-A3B-Q4-IT, flash-lite
 
 ########################################################################################################################
 
 [unsloth/Qwen3.6-35B-A3B-UD-Q5_K_XL-MTP-NT]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q5_K_XL.gguf
-alias = Qwen3.6-35B-A3B-Q5-IT
+alias = Qwen3.6-35B-A3B-Q5-IT, flash
 
 ########################################################################################################################

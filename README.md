@@ -49,6 +49,21 @@ Each preset directory contains a launcher script and a TOML configuration file f
 | `gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
 | `nex-mini/` | Nex-N2-mini (nex-agi) | 8082 | Small-footprint model |
 
+## Qwen3.6 Model Routing (MoE 35B-A3B / Dense 27B)
+
+Five routing tiers are available across NT and Reasoning presets — see the full routing guide for benchmarks, KLD quality
+measurements, and a detailed decision matrix.
+
+| Tier | Mode | Est. tok/s | Use Case |
+| --- | --- | --- | --- |
+| **flash-lite** | NT | ~100–130 | Max throughput, high-volume pipelines |
+| **flash** | NT | ~80–110 | Standard quality, agentic / rapid chat |
+| **reason-fast** / **coder-fast** | Reasoning | ~100–130 | Everyday research, coding, analysis |
+| **reason-pro** / **coder-pro** | Reasoning | ~80–110 | **Default for serious work.** Precision analysis |
+| **expert** | Reasoning | ~14–18 | High-stakes tasks where Dense benchmark edge matters |
+
+_See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for full benchmarks, quality analysis, and the complete decision matrix._
+
 ## Gemma-4 Model Routing (MoE 26B-A4B)
 
 | Tier | Quantization | Task Profile | Use Case |
@@ -97,6 +112,4 @@ curl http://localhost:PORT/v1/chat/completions \
 curl http://localhost:PORT/v1/models
 ```
 
-## Hardware
 
-Benchmarks and configurations are optimized for **NVIDIA DGX Spark** (GB10 SoC, 128GB LPDDR5x, ~273 GB/s bandwidth).

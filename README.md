@@ -1,96 +1,83 @@
 # `llama.cpp server` launcher
 
-A collection of scripts and configurations for launching `llama.cpp server` with various GGUF models with optimized
-settings.
+A collection of scripts and configurations for launching [`llama.cpp`](https://github.com/ggml-org/llama.cpp)
+server with various GGUF models using optimized settings, including **Multi-Token Prediction (MTP)** 
+speculative decoding.
 
-## Usage Examples
+## Quick Start
 
-### Downloading Models
-
-The `huggingface-scripts/download-models.sh` script automates the downloading of models defined in
-`huggingface-scripts/models.json`.
-
-Models are managed via this central configuration file, which defines:
-
-- `cacheDir`: The base directory where models are cached.
-- `models`: A list of configurations containing:
-  - `modelId`: The Hugging Face repository ID.
-  - `localDir`: The destination directory for the downloaded files.
-  - `include`: A list of file patterns (globs) to selectively download specific weights or components (e.g., specific
-    quantization levels or MTP files).
-
-**Prerequisites:** Before using the script, you must have the Hugging Face CLI installed. You can install it via `pip`
-([official guide](https://huggingface.co/docs/huggingface_hub/en/installation)):
+### 1. Download Models
 
 ```bash
-pip install huggingface_hub
+./huggingface-scripts/download-models.sh
 ```
 
-**Examples:**
+See the [HuggingFace scripts README](huggingface-scripts/README.md) for prerequisites,
+single-model downloads, and configuration details.
 
-1. **Download all models defined in the config:**
+### 2. Configure Server Path
 
-   ```bash
-   ./huggingface-scripts/download-models.sh
-   ```
-
-2. **Download a specific model by its ID (from config):**
-
-   ```bash
-   ./huggingface-scripts/download-models.sh <model_id>
-   ```
-
-3. **List all available model IDs in the config:**
-
-   ```bash
-   ./huggingface-scripts/download-models.sh --list
-   ```
-
-4. **Perform a dry run to see what would be downloaded:**
-   ```bash
-   ./huggingface-scripts/download-models.sh --dry-run
-   ```
-
-### Serving models
-
-The `launchers/` directory contains shell scripts to start `llama-server` with pre-configured settings for specific
-model families.
-
-**Examples:**
-
-1. **Launch Gemma-4 MTP server:**
+Each launcher requires a path to the `llama-server` binary. Create a `.env.launcher` file in the repo root:
 
 ```bash
-./launchers/launcher-gemma.sh
+cp .env.launcher.example .env.launcher
 ```
 
-### Gemma-4 MTP Decision Matrix
+Then edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` path. 
+The `.env.launcher` file is git-ignored so it won't be committed.
 
-| Tier           | Model ID             | Quant        | Task Profile         | Use Case                          |
-| :------------- | :------------------- | :----------- | :------------------- | :-------------------------------- |
-| **flash-lite** | `gemma-4-flash-lite` | Q4_K_M (UD)  | High-Volume          | Log analysis, data cleaning       |
-| **flash**      | `gemma-4-flash`      | Q4_K_XL (UD) | Agentic / Rapid Chat | Boilerplate, documentation        |
-| **flash-high** | `gemma-4-flash-high` | Q5_K_M       | Logic / Math / Code  | Debugging, math proofs            |
-| **pro**        | `gemma-4-pro`        | Q5_K_XL      | High-Stakes / Batch  | Legal/medical, codebase migration |
+### 3. Launch a Server
 
-_See [detailed routing document](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis._
+Run one of the launcher scripts below to start `llama-server` with pre-configured settings.
 
-2. **Launch Qwen 3.6 MTP server:**
+## Available Launchers
 
-```bash
-./launchers/launcher-qwen.sh
-```
+### Root-Level Launchers (Convenience Scripts)
 
-## Testing OpenAI Compatible Endpoints
+| Script | Description | Default Port(s) |
+| --- | --- | --- |
+| `launcher-gemma.sh` | Gemma-4 MTP server (MoE 26B-A4B) | 7080 |
+| `launcher-qwen.sh` | Qwen 3.6 MTP — two instances (NT + Coder presets) | 8080, 8081 |
 
-Once you have launched a server, you can test its OpenAI-compatible endpoints using `curl`.
+### Preset Launchers (`launchers/`)
 
-Replace `localhost:PORT` with the actual host and port where your server is running (e.g., `localhost:8080`,
-`localhost:8081`, or `localhost:8082`).
+Each preset directory contains a launcher script and a TOML configuration file for fine-tuned model settings.
 
-### 1. Ask a Question (Chat Completions)
+| Launcher Path | Model / Family | Port | Notes |
+| --- | --- | --- | --- |
+| `qwen3.6-mtp/` | Qwen3.6 MTP — NT & Coder presets | 8080, 8081 | Multi-instance with TOML catalog configs |
+| `gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
+| `nex-mini/` | Nex-N2-mini (nex-agi) | 8082 | Small-footprint model |
 
-Use the `/v1/chat/completions` endpoint to send a message to the model.
+## Gemma-4 Model Routing (MoE 26B-A4B)
+
+| Tier | Quantization | Task Profile | Use Case |
+| --- | --- | --- | --- |
+| **flash-lite** | Q4_K_M (UD) | High-Volume | Log analysis, data cleaning |
+| **flash** | Q4_K_XL (UD) | Agentic / Rapid Chat | Boilerplate, documentation |
+| **flash-high** | Q5_K_M | Logic / Math / Code | Debugging, math proofs |
+| **pro** | Q5_K_XL | High-Stakes / Batch | Legal/medical, migration |
+
+_See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis._
+
+## Supported Models (from `models.json`)
+
+| Model | Provider | Quantizations Available |
+| --- | --- | --- |
+| Qwen3.6-27B-MTP | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
+| Qwen3.6-35B-A3B-MTP | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
+| Gemma-4 26B-A4B-it | unsloth / bartowski | Q4_K_M/XL (UD), MTP drafter |
+| Gemma-4 31B-it | unsloth / bartowski | Q4_K_XL (UD) + MTP drafter |
+| Gemma-4 12B-it | unsloth | Q8_K_XL |
+| GLM-4.7-Flash | unsloth | Q5_K_XL |
+| Nex-N2-mini | bartowski | Q5_K_M |
+
+## Testing OpenAI-Compatible Endpoints
+
+After launching a server, test its endpoints with `curl`. Replace `PORT` with the
+actual port (e.g., 8080, 8081, or 7080).
+
+### Chat Completions
 
 ```bash
 curl http://localhost:PORT/v1/chat/completions \
@@ -104,12 +91,12 @@ curl http://localhost:PORT/v1/chat/completions \
   }'
 ```
 
-_Note: If you are unsure of the model name, you can use the "List Models" command below first._
-
-### 2. List Models
-
-Use the `/v1/models` endpoint to see which models are currently loaded and available.
+### List Models
 
 ```bash
 curl http://localhost:PORT/v1/models
 ```
+
+## Hardware
+
+Benchmarks and configurations are optimized for **NVIDIA DGX Spark** (GB10 SoC, 128GB LPDDR5x, ~273 GB/s bandwidth).

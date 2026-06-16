@@ -15,7 +15,6 @@ launch_server() {
   local port="${2}"
   local log_dir="${3}"
 
-  # /home/saumen/workspace/github/ggml-org/2026-06-07/llama.cpp/build/bin/llama-server \
   "${LLAMA_SERVER_BIN}" \
     --models-preset "$SCRIPT_DIR/launchers/qwen3.6-mtp/${preset}.toml" \
     --host 0.0.0.0 \
@@ -36,5 +35,3 @@ launch_server qwen3.6-catalog-nt 8080 "${log_dir}" &
 launch_server qwen3.6-catalog-coder 8081 "${log_dir}" &
 
 tail -f "${log_dir}/qwen3.6-catalog-coder.log" "${log_dir}/qwen3.6-catalog-nt.log"
-
-# "${LLAMA_SERVER_BIN}" \

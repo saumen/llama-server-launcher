@@ -22,7 +22,7 @@ launch_server() {
     --models-max 2 \
     --flash-attn on \
     --cont-batching \
-    --no-mmproj \
+    --image-min-tokens 1024 \
     --log-colors on \
     --log-timestamps \
     --log-file "${log_dir}/${preset}.log"

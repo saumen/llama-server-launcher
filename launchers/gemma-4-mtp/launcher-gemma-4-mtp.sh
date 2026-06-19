@@ -13,6 +13,5 @@ ${LLAMA_SERVER_BIN} \
     --models-max 2 \
     --flash-attn on \
     --cont-batching \
-    --no-mmproj \
     --log-colors on \
     --log-timestamps

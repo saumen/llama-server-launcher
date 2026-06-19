@@ -29,10 +29,12 @@ draft-p-min = 0.50
 
 [unsloth/Qwen3.6-35B-A3B-UD-Q4_K_XL-MTP-Coder]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf
+mmproj = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/mmproj-F32.gguf
 alias = Qwen3.6-35B-A3B-Q4-Coder, reason-fast, coder-fast
 
 [unsloth/Qwen3.6-35B-A3B-UD-Q5_K_XL-MTP-Coder]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/Qwen3.6-35B-A3B-UD-Q5_K_XL.gguf
+mmproj = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/mmproj-F32.gguf
 alias = Qwen3.6-35B-A3B-Q5-Coder, reason-pro, coder-pro
 
 ########################################################################################################################
@@ -41,6 +43,7 @@ alias = Qwen3.6-35B-A3B-Q5-Coder, reason-pro, coder-pro
 
 [unsloth/Qwen3.6-27B-UD-Q5_K_XL-MTP-Coder]
 model = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/Qwen3.6-27B-UD-Q5_K_XL.gguf
+mmproj = /home/saumen/.cache/huggingface/hub/unsloth/Qwen3.6-27B-MTP-GGUF/mmproj-F32.gguf
 alias = Qwen3.6-27B-Q5-Coder, expert
 
 ########################################################################################################################

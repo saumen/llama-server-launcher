@@ -1,7 +1,7 @@
 # `llama.cpp server` launcher
 
 A collection of scripts and configurations for launching [`llama.cpp`](https://github.com/ggml-org/llama.cpp)
-server with various GGUF models using optimized settings, including **Multi-Token Prediction (MTP)** 
+server with various GGUF models using optimized settings, including **Multi-Token Prediction (MTP)**
 speculative decoding.
 
 ## Quick Start
@@ -23,7 +23,7 @@ Each launcher requires a path to the `llama-server` binary. Create a `.env.launc
 cp .env.launcher.example .env.launcher
 ```
 
-Then edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` path. 
+Then edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` path.
 The `.env.launcher` file is git-ignored so it won't be committed.
 
 ### 3. Launch a Server
@@ -75,6 +75,24 @@ _See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing
 
 _See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis._
 
+## Thinking Mode Configuration
+
+All launcher presets use `reasoning = on/off` instead of `chat-template-kwargs = {"enable_thinking":...}`.
+
+| Approach | Example | Layer |
+| --- | --- | --- |
+| `reasoning` (preferred) | `reasoning = on` | llama.cpp native flag — integrates with output parser |
+| `chat-template-kwargs` | `chat-template-kwargs = {"enable_thinking":true}` | Jinja template variable — no parser integration |
+
+**Why `reasoning` is preferred:**
+
+- **Parser integration** — llama.cpp knows reasoning is active, enabling features like extracting thoughts into `reasoning_content` and proper thinking marker handling
+- **Cleaner syntax** — `on`/`off` is readable and unambiguous compared to inline JSON
+- **Model-agnostic** — works even when the chat template doesn't explicitly support `enable_thinking`, because llama.cpp handles the thinking path at the parser level
+- **Future-proof** — part of the evolving reasoning infrastructure alongside `reasoning-budget` and `reasoning-format`
+
+`chat-template-kwargs` remains useful for per-request overrides via the OpenAI-compatible API endpoint.
+
 ## Supported Models (from `models.json`)
 
 | Model | Provider | Quantizations Available |
@@ -111,5 +129,3 @@ curl http://localhost:PORT/v1/chat/completions \
 ```bash
 curl http://localhost:PORT/v1/models
 ```
-
-

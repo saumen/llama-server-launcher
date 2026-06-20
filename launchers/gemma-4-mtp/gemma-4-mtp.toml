@@ -21,7 +21,7 @@ spec-type = draft-mtp
 draft-p-min = 0.50
 spec-draft-n-max = 2
 
-chat-template-kwargs = {"enable_thinking":false}
+reasoning = off
 
 mmproj = /home/saumen/.cache/huggingface/hub/google/gemma-4-26B-A4B-it-GGUF/mmproj-gemma-4-26B-A4B-it-BF16.gguf
 
@@ -45,7 +45,7 @@ spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-i
 alias = gemma-4-26B-A4B-Q5_K_M, gemma-4-flash-high
 model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q5_K_M.gguf
 spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
-chat-template-kwargs = {"enable_thinking":true}
+reasoning = on
 
 # Grammar/nuance correction, legal/medical polishing.
 # Codebase migration, regression testing.
@@ -54,4 +54,4 @@ chat-template-kwargs = {"enable_thinking":true}
 alias = gemma-4-26B-A4B-Q5_K_XL, gemma-4-pro
 model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf
 spec-draft-model = /home/saumen/.cache/huggingface/hub/unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf
-chat-template-kwargs = {"enable_thinking":true}
+reasoning = on

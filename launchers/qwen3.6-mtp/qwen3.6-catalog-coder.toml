@@ -10,7 +10,7 @@ cache-type-k = f16
 cache-type-v = f16
 
 # Thinking mode for precise coding tasks
-chat-template-kwargs = {"enable_thinking":true}
+reasoning = on
 temperature = 0.6
 top-p = 0.95
 top-k = 20

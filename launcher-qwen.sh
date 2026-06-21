@@ -22,6 +22,10 @@ launch_server() {
     --models-max 2 \
     --flash-attn on \
     --cont-batching \
+    --gpu-layers all \
+    --gpu-layers-draft all \
+    --device CUDA0 \
+    --spec-draft-device CUDA0 \
     --image-min-tokens 1024 \
     --log-colors on \
     --log-timestamps \

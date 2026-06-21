@@ -4,7 +4,6 @@
 
 [*]
 ctx-size = 150000
-n-gpu-layers = 99
 
 cache-type-k = f16
 cache-type-v = f16

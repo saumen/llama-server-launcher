@@ -1,9 +1,32 @@
 # MEMORY
 
+## Sampling parameter decisions (2026-06-22)
+
+### Infinite thinking loop fix — Qwen3.6-35B-A3B
+
+Qwen3.6-35B-A3B enters infinite thinking loops (100K+ tokens, zero tool calls) when `presence-penalty = 0.0`.
+Fix applied to both coder and NT presets:
+
+| Parameter | Coder value | NT value | Rationale |
+|-----------|------------|----------|-----------|
+| `presence-penalty` | `1.5` | `1.5` | Unsloth community fix — prevents token repetition that triggers thinking loops |
+| `repeat-penalty` | `1.1` | `1.1` | `1.0` is no-op; `1.1` applies mild token-level repetition prevention |
+| `reasoning-budget` | `16384` | — | Hard stop on thinking tokens (coder only) |
+| `dry-multiplier` | `0.8` | — | DRY sampler sweet spot (coder only) |
+| `dry-base` | `1.75` | — | Canonical exponential penalty base |
+| `dry-allowed-length` | `2` | — | Allows natural short repeats, catches 3+ token loops |
+| `dry-penalty-last-n` | `-1` | — | Full context for long-context repetition patterns |
+
+**Evidence:** [Unsloth commit 0b57884](https://github.com/unslothai/unsloth/commit/0b57884120f68a9765dba63b28f9f2d85df6ad9b), [QwenLM/Qwen3.6 #145](https://github.com/QwenLM/Qwen3.6/issues/145)
+
+### Version stability
+
+All four DRY sampler parameters are explicitly set (not relying on defaults) to prevent silent behavior shifts across llama.cpp versions.
+
 ## Trial and error notes
 
 - Do not set global `--gpu-layers`. GPU offload setting is defined in models preset.
-- `--cache-ram` default is 8GB. Increased to `32768` leverage massive VRAM in DGX Spark. 
+- `--cache-ram` default is 8GB. Increased to `32768` leverage massive VRAM in DGX Spark.
   - Removed with the removal of --kv-unified.
 
 ### `--kv-unified`
@@ -26,11 +49,13 @@ If speed becomes an issue, add `--kv-unified` with
 
 - `--cache-reuse` requires `--kv-unified`.
 - `--ctx-size` = per model `ctx-size` x parallel `N`. Example:
+
   ```text
   per model ctx-size = 200000
   parallel = 4
   therefore, global --ctx-size 200000 x 4 = 800000
   ```
+
 - Removed with the removal of --kv-unified.
 
 ## Read as needed

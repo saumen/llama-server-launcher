@@ -144,8 +144,9 @@ more valuable. However, the absolute throughput still favors MoE by a large marg
 - **Recommended MTP settings:** `--spec-type draft-mtp --spec-draft-n-max 2` per Unsloth docs (optimal acceptance rate
   ~83%). **Note:** Local catalog files use `spec-draft-n-max = 3`, which may be DGX Spark-specific. Unsloth recommends
   trying values 1-6 and selecting the fastest for your hardware.
-- **Context window:** 150,000 tokens configured in launcher presets (native support up to 262K, extensible to 1M via
-  YaRN)
+- **Context window:** NT (flash/flash-lite) = 80,000 tokens — increased from 50k to support longer agentic sessions while flash models remain optimized for quick edit and rapid
+  agentic chat where large context is unnecessary overhead; Coder (reason-fast/pro/expert) = 70,000 tokens — balances depth with faster prompt processing, quicker session end
+  memory updates, and headroom for focused task sessions. Native support up to 262K, extensible to 1M via YaRN
 
 ### 5. Preset Modes: Non-Thinking vs Coder
 

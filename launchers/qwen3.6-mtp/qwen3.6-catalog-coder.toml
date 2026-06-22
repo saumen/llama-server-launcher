@@ -3,7 +3,7 @@
 ########################################################################################################################
 
 [*]
-ctx-size = 150000
+ctx-size = 70000
 
 cache-type-k = f16
 cache-type-v = f16
@@ -14,8 +14,15 @@ temperature = 0.6
 top-p = 0.95
 top-k = 20
 min-p = 0.0
-presence-penalty = 0.0
-repeat-penalty = 1.0
+presence-penalty = 1.5
+repeat-penalty = 1.1
+reasoning-budget = 16384
+
+# DRY sampler — prevents infinite thinking loops (Qwen3.6 known issue)
+dry-multiplier = 0.8
+dry-base = 1.75
+dry-allowed-length = 2
+dry-penalty-last-n = -1
 
 # Speculation
 spec-type = draft-mtp

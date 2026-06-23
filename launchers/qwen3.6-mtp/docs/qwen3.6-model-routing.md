@@ -232,7 +232,7 @@ penalty.
   smcleod.net scale: <0.005 identical, 0.005–0.02 very close, 0.02–0.05 close, 0.05–0.10 measurable drift, >0.10
   substantial divergence.
 - **Verification**: Benchmark scores verified against official HuggingFace model cards (Qwen/Qwen3.6-27B,
-  Qwen/Qwen3.6-35B-A3B). Catalog presets cross-checked against current `qwen3.6-catalog.toml`. Sampling parameters
+  Qwen/Qwen3.6-35B-A3B). Catalog presets cross-checked against current `qwen3.6-catalog.ini`. Sampling parameters
   cross-checked against both model cards and Unsloth documentation.
 
 ## Sources

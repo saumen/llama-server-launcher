@@ -109,17 +109,17 @@ Field benchmarks on GB10 hardware show the 26B-A4B MoE Q4_K_M variant at ~61 tok
   150k value was chosen to balance VRAM consumption between context window and model weights on 128GB hardware.
 - **Speculative Decoding:** `draft-p-min = 0.50` is more aggressive than the archived turbo-MTP's 0.75. This accepts
   more draft tokens, prioritizing throughput over quality. Monitor generation quality when using this setting.
-- **Hardcoded Paths:** All TOML configs use absolute paths (`/home/saumen/.cache/huggingface/hub/...`) that will fail on
-  other machines. The `models.json` download manifest uses portable HuggingFace model IDs, but the TOML configs do not
+- **Hardcoded Paths:** All INI configs use absolute paths (`/home/saumen/.cache/huggingface/hub/...`) that will fail on
+  other machines. The `models.json` download manifest uses portable HuggingFace model IDs, but the INI configs do not
   reference them. Before deploying on another machine, update all `model` and `spec-draft-model` paths in
-  `gemma-4-mtp.toml` to match the downloaded file locations, or convert to model IDs with a path resolution layer.
+  `gemma-4-mtp.ini` to match the downloaded file locations, or convert to model IDs with a path resolution layer.
 
 ### 4. GGUF Sources
 
 - **MTP-Optimized/UD:** `unsloth/gemma-4-26B-A4B-it-GGUF` (active config)
 - **Standard High-Fidelity (Research Only):** `bartowski/gemma-4-26B-A4B-GGUF` and `bartowski/gemma-4-31B-GGUF`
   > **Research Only — Not Deployable:** Bartowski models are listed in the benchmark table for reference only. They have
-  > no entry in `models.json` and no TOML configuration. They cannot be downloaded or deployed with the current
+  > no entry in `models.json` and no INI configuration. They cannot be downloaded or deployed with the current
   > codebase. Kept for comparative purposes.
 - **MTP Drafters:** `unsloth/gemma-4-26B-A4B-it-GGUF/MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf` (active)
 - **Archived QAT Drafters:** `RachidAR/gemma-4-26B-A4B-it-qat-assistant-q4_0-gguf` and
@@ -160,7 +160,7 @@ frontier[[7]](#sources).
 
 ## Open Issues
 
-- TOML configs use hardcoded absolute paths (`/home/saumen/.cache/...`) — portable path resolution is deferred.
+- INI configs use hardcoded absolute paths (`/home/saumen/.cache/...`) — portable path resolution is deferred.
 
 ## Sources
 

@@ -1,6 +1,6 @@
 # MEMORY
 
-## Catalog presets (qwen3.6-catalog.toml)
+## Catalog presets (qwen3.6-catalog.ini)
 
 Five presets, all inheriting from base `[ * ]` defaults (`ctx-size=120000`, `cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
 
@@ -54,7 +54,7 @@ Base `[ * ]` preset sets `repeat-penalty = 1.0`. This is the no-op value — rep
 
 ## Trial and error notes
 
-- GPU offload is set via CLI flags on `launcher-qwen.sh` (`--gpu-layers all`, `--gpu-layers-draft all`), not in the TOML preset. The Qwen catalog has no `n-gpu-layers` entries.
+- GPU offload is set via CLI flags on `launcher-qwen.sh` (`--gpu-layers all`, `--gpu-layers-draft all`), not in the INI preset. The Qwen catalog has no `n-gpu-layers` entries.
 - DRY sampler params (`reasoning-budget`, `dry-multiplier`, `dry-base`, `dry-allowed-length`, `dry-penalty-last-n`) are NOT in the catalog or launcher script — they were removed or never applied to current config.
 - `--cache-ram` default is 8GB. Was increased to `32768` but removed with --kv-unified removal.
 

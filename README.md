@@ -41,11 +41,11 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 
 ### Preset Launchers (`launchers/`)
 
-Each preset directory contains a launcher script and a TOML configuration file for fine-tuned model settings.
+Each preset directory contains a launcher script and an INI configuration file for fine-tuned model settings.
 
 | Launcher Path | Model / Family | Port | Notes |
 | --- | --- | --- | --- |
-| `qwen3.6-mtp/` | Qwen3.6 MTP — 5 routing tiers (flash, general, coder, +expert) | 8080 | Single instance with TOML catalog configs |
+| `qwen3.6-mtp/` | Qwen3.6 MTP — 5 routing tiers (flash, general, coder, +expert) | 8080 | Single instance with INI catalog configs |
 | `gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
 | `nex-mini/` | Nex-N2-mini (nex-agi) | 8082 | Small-footprint model |
 

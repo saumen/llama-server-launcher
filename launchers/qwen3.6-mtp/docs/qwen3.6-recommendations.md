@@ -6,7 +6,7 @@ These are recommended settings from [huggingface/qwen](https://huggingface.co/Qw
 
 ## Thinking mode for general tasks
 
-```toml
+```ini
 temperature = 1.0
 top_p = 0.95
 top_k = 20
@@ -17,7 +17,7 @@ repetition_penalty = 1.0
 
 ## Thinking mode for precise coding tasks
 
-```toml
+```ini
 temperature = 0.6
 top_p = 0.95
 top_k = 20
@@ -28,7 +28,7 @@ repetition_penalty = 1.0
 
 ## Instruct or non-thinking mode
 
-```toml
+```ini
 temperature = 0.7
 top_p = 0.80
 top_k = 20

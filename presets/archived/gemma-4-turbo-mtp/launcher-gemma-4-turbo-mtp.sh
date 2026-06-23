@@ -51,12 +51,12 @@
 #   --no-mmproj
 
 ~/workspace/github/AtomicBot-ai/atomic-llama-cpp-turboquant/build/bin/llama-server \
-  --host 0.0.0.0 \
-  --port 8080 \
-  --models-preset ~/workspace/github/saumen/llama-server-launcher/launchers/gemma-4-turbo-mtp/gemma-4-turbo-mtp.toml \
-  --models-max 2 \
-  --flash-attn on \
-  --cont-batching \
-  --no-mmproj \
-  --log-colors on \
-  --log-timestamps
+	--host 0.0.0.0 \
+	--port 8080 \
+	--models-preset ~/workspace/github/saumen/llama-server-launcher/launchers/gemma-4-turbo-mtp/gemma-4-turbo-mtp.ini \
+	--models-max 2 \
+	--flash-attn on \
+	--cont-batching \
+	--no-mmproj \
+	--log-colors on \
+	--log-timestamps

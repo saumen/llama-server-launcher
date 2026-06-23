@@ -37,7 +37,7 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 | Script | Description | Default Port(s) |
 | --- | --- | --- |
 | `launcher-gemma.sh` | Gemma-4 MTP server (MoE 26B-A4B) | 7080 |
-| `launcher-qwen.sh` | Qwen 3.6 MTP — two instances (NT + Coder presets) | 8080, 8081 |
+| `launcher-qwen.sh` | Qwen 3.6 MTP — single instance with 5 routing tiers | 8080 |
 
 ### Preset Launchers (`launchers/`)
 
@@ -45,7 +45,7 @@ Each preset directory contains a launcher script and a TOML configuration file f
 
 | Launcher Path | Model / Family | Port | Notes |
 | --- | --- | --- | --- |
-| `qwen3.6-mtp/` | Qwen3.6 MTP — NT & Coder presets | 8080, 8081 | Multi-instance with TOML catalog configs |
+| `qwen3.6-mtp/` | Qwen3.6 MTP — 5 routing tiers (flash, general, coder, +expert) | 8080 | Single instance with TOML catalog configs |
 | `gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
 | `nex-mini/` | Nex-N2-mini (nex-agi) | 8082 | Small-footprint model |
 
@@ -54,13 +54,13 @@ Each preset directory contains a launcher script and a TOML configuration file f
 Five routing tiers are available across NT and Reasoning presets — see the full routing guide for benchmarks, KLD quality
 measurements, and a detailed decision matrix.
 
-| Tier | Mode | Est. tok/s | Use Case |
-| --- | --- | --- | --- |
-| **flash-lite** | NT | ~100–130 | Max throughput, high-volume pipelines |
-| **flash** | NT | ~80–110 | Standard quality, agentic / rapid chat |
-| **reason-fast** / **coder-fast** | Reasoning | ~100–130 | Everyday research, coding, analysis |
-| **reason-pro** / **coder-pro** | Reasoning | ~80–110 | **Default for serious work.** Precision analysis |
-| **expert** | Reasoning | ~14–18 | High-stakes tasks where Dense benchmark edge matters |
+| Tier | Alias | Mode | Est. tok/s | Use Case |
+| --- | --- | --- | --- | --- |
+| **flash** | `Qwen3.6-35B-A3B-Q5-IT` | NT | ~80–110 | Agentic / rapid chat; near-BF16 quality (KLD ~0.007) |
+| **general** | `Qwen3.6-35B-A3B-Q5-general` | General | ~80–110 | Thinking mode + MTP for everyday reasoning |
+| **general-expert** | `Qwen3.6-27B-Q5-Expert` | General | ~14–18 | 27B Dense with 150K context for deep reasoning |
+| **coder** | `Qwen3.6-35B-A3B-Q5-Coder` | Coder | ~80–110 | MoE speed + thinking for coding and analysis |
+| **coder-expert** | `Qwen3.6-27B-Q5-Coder` | Coder | ~14–18 | 27B Dense with 150K context for complex coding |
 
 _See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for full benchmarks, quality analysis, and the complete decision matrix._
 
@@ -77,7 +77,12 @@ _See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) 
 
 ## Thinking Mode Configuration
 
-All launcher presets use `reasoning = on/off` instead of `chat-template-kwargs = {"enable_thinking":...}`.
+Launcher presets use reasoning flags and/or chat template kwargs to control thinking mode.
+
+- **Qwen3.6 flash** preset uses `reasoning = off` explicitly
+- **Other Qwen tiers** rely on the inherited
+  `chat-template-kwargs = {"enable_thinking":true}` base default
+- **Gemma-4 presets** use `reasoning = on/off` per tier
 
 | Approach | Example | Layer |
 | --- | --- | --- |
@@ -93,22 +98,22 @@ All launcher presets use `reasoning = on/off` instead of `chat-template-kwargs =
 
 `chat-template-kwargs` remains useful for per-request overrides via the OpenAI-compatible API endpoint.
 
-## Supported Models (from `models.json`)
+## Supported Models (from `huggingface-scripts/models.json`)
 
 | Model | Provider | Quantizations Available |
 | --- | --- | --- |
-| Qwen3.6-27B-MTP | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
-| Qwen3.6-35B-A3B-MTP | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
+| Qwen3.6-27B (Dense + MTP) | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
+| Qwen3.6-35B-A3B (MoE + MTP) | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
 | Gemma-4 26B-A4B-it | unsloth / bartowski | Q4_K_M/XL (UD), MTP drafter |
 | Gemma-4 31B-it | unsloth / bartowski | Q4_K_XL (UD) + MTP drafter |
-| Gemma-4 12B-it | unsloth | Q8_K_XL |
-| GLM-4.7-Flash | unsloth | Q5_K_XL |
+| Gemma-4 12B-it | unsloth | UD-Q8_K_XL |
+| GLM-4.7-Flash | unsloth | UD-Q5_K_XL |
 | Nex-N2-mini | bartowski | Q5_K_M |
 
 ## Testing OpenAI-Compatible Endpoints
 
 After launching a server, test its endpoints with `curl`. Replace `PORT` with the
-actual port (e.g., 8080, 8081, or 7080).
+actual port (e.g., 8080, 8082, or 7080).
 
 ### Chat Completions
 

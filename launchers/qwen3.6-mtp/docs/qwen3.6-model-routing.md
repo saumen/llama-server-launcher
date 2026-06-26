@@ -15,17 +15,21 @@ tags:
 ## Executive Summary
 
 This report provides an objective, quantitative comparison of the expected generation speeds (tok/s) and quality
-retention for Qwen3.6 Multi-Token Prediction (MTP) architectures—**Dense (27B)** and **MoE (35B-A3B)**—using `llama.cpp`
-on NVIDIA DGX Spark hardware.
+retention for Qwen3.6 Multi-Token Prediction (MTP) architectures—**Dense (27B)** and **MoE (35B-A3B)**—and the
+Qwen-AgentWorld-35B-A3B Language World Model (LWM), all using `llama.cpp` on NVIDIA DGX Spark hardware.
 
 The data demonstrates that while MTP (Multi-Token Prediction) boosts throughput for both architectures, the speedup is
 more pronounced for the Dense model (~1.4-2.2x) than for MoE (~1.15-1.25x). However, the MoE architecture activates only
 ~3B parameters per token versus 27B for Dense, making it the throughput champion on the DGX Spark's ~273 GB/s memory
-bandwidth. The use of Unsloth's Dynamic Quantization (UD) for the `Q5_K_XL` variant provides a significant accuracy boost over
-standard naive quantization.
+bandwidth. The use of Unsloth's Dynamic Quantization (UD) for the `Q5_K_XL` variant provides a significant accuracy
+boost over standard naive quantization.
 
 The 27B Dense model achieves superior benchmark scores across coding, reasoning, and knowledge tasks compared to the
 35B-A3B MoE variant, but its throughput on DGX Spark is significantly lower due to full-parameter activation.
+
+A fourth model class — **Qwen-AgentWorld-35B-A3B** — serves a distinct purpose: it is a native Language World Model for
+agentic environment simulation (predicting terminal output, tool responses, GUI states), not a general-purpose coding or
+reasoning LLM. It is included as a complementary tier for simulation and evaluation workflows.
 
 ## Benchmarks: llama.cpp + MTP
 
@@ -33,23 +37,25 @@ All benchmarks assume the use of Unsloth Dynamic v2.0 GGUF weights from `unsloth
 
 ### Quantitative Performance & Quality Table
 
-| Model Architecture | Quantization | Provider | Est. tok/s (MTP, DGX Spark) | Mean KLD (vs BF16)     | Quality Band           |
-| ------------------ | ------------ | -------- | --------------------------- | ---------------------- | ---------------------- |
-| **35B-A3B (MoE)**  | **BF16**     | Qwen     | **[Baseline]**              | **0.0000 (reference)** | **Reference**          |
-| **35B-A3B (MoE)**  | Q5_K_XL (UD) | Unsloth  | ~80 - 110 (projected)       | **~0.0069**            | Very close (< 0.01)    |
-|                    |              |          |                             |                        |                        |
-| **27B (Dense)**    | **BF16**     | Qwen     | **[Baseline]**              | **0.0000 (reference)** | **Reference**          |
-| **27B (Dense)**    | Q5_K_XL (UD) | Unsloth  | ~14 - 18 (projected)        | **0.0455**             | Close (0.02–0.05 band) |
+| Model Architecture | Quantization | Provider | Est. tok/s (MTP, DGX Spark) | Mean KLD (vs BF16) | Quality Band |
+| --- | --- | --- | --- | --- | --- |
+| **35B-A3B (MoE)** | **BF16** | Qwen | **[Baseline]** | **0.0000 (reference)** | **Reference** |
+| **35B-A3B (MoE)** | Q5_K_XL (UD) | Unsloth | ~80 - 110 (projected) | **~0.0069** | Very close (< 0.01) |
+| --- | --- | --- | --- | --- | --- |
+| **27B (Dense)** | **BF16** | Qwen | **[Baseline]** | **0.0000 (reference)** | **Reference** |
+| **27B (Dense)** | Q5_K_XL (UD) | Unsloth | ~14 - 18 (projected) | **0.0455** | Close (0.02–0.05 band) |
+| --- | --- | --- | --- | --- | --- |
+| **35B-A3B (LWM)** | Q5_K_XL (UD) | Unsloth | ~60 - 90 (projected) | N/A\* | AgentWorldBench rubric |
 
 **Footnotes:**
 
 - **Mean KLD (KL Divergence):** Measures how much the quantized model's token predictions diverge from BF16. Lower =
   closer to original. 35B-A3B values measured by localbench (~250K tokens). 27B values measured by independent
-  researcher using `llama-perplexity` (8192 tokens, KV cache q8_0): UD-Q5_K_XL = 0.0455. Unsloth UD
-  GGUFs rank on the SOTA Pareto frontier for 21 of 22 sizes tested on 35B-A3B.
-- **Why Dense drifts more than MoE:** The MoE activates only ~3B of 35B parameters per token. The remaining ~97%
-  of expert weights are inactive and their quantization noise never reaches the output. The Dense model activates all
-  27B on every token — quantization error compounds across the full parameter set. This structural sparsity gives MoE a
+  researcher using `llama-perplexity` (8192 tokens, KV cache q8_0): UD-Q5_K_XL = 0.0455. Unsloth UD GGUFs rank on the
+  SOTA Pareto frontier for 21 of 22 sizes tested on 35B-A3B.
+- **Why Dense drifts more than MoE:** The MoE activates only ~3B of 35B parameters per token. The remaining ~97% of
+  expert weights are inactive and their quantization noise never reaches the output. The Dense model activates all 27B
+  on every token — quantization error compounds across the full parameter set. This structural sparsity gives MoE a
   natural advantage under quantization.
 - **Quality bands** (per smcleod.net scale): `<0.005` = essentially identical, `0.005–0.02` = very close, `0.02–0.05` =
   close with minor drift, `0.05–0.10` = measurable but often imperceptible under sampling, `>0.10` = substantial
@@ -62,6 +68,9 @@ All benchmarks assume the use of Unsloth Dynamic v2.0 GGUF weights from `unsloth
   MTP speedup factors (Dense: 1.4-2.2x, MoE: 1.15-1.25x at draft-n-max=2). **These are unmeasured projections, not
   benchmarked results.** For reference, Unsloth reports 160 tok/s (27B) and 240 tok/s (35B-A3B) on RTX 6000 GPU with MTP
   enabled.
+- **\*KLD N/A for LWM:** The AgentWorld model is evaluated via AgentWorldBench (5-dimensional rubric: Format,
+  Factuality, Consistency, Realism, Quality), not KL divergence against a BF16 reference. Its training objective is
+  environment state prediction, not token-level next-token matching.
 
 ### Official Benchmark Scores (BF16)
 
@@ -70,33 +79,33 @@ reflecting the advantage of full parameter activation for reasoning-intensive ta
 
 #### Coding & Agentic
 
-| Benchmark              | Qwen3.6-27B (Dense) | Qwen3.6-35B-A3B (MoE) | Delta |
-| ---------------------- | ------------------- | --------------------- | ----- |
-| **SWE-bench Verified** | 77.2                | 73.4                  | +3.8  |
-| **SWE-bench Pro**      | 53.5                | 49.5                  | +4.0  |
-| **Terminal-Bench 2.0** | 59.3                | 51.5                  | +7.8  |
-| **SkillsBench Avg5**   | 48.2                | 28.7                  | +19.5 |
-| **NL2Repo**            | 36.2                | 29.4                  | +6.8  |
-| **LiveCodeBench v6**   | 83.9                | 80.4                  | +3.5  |
+| Benchmark | Qwen3.6-27B (Dense) | Qwen3.6-35B-A3B (MoE) | Delta |
+| --- | --- | --- | --- |
+| **SWE-bench Verified** | 77.2 | 73.4 | +3.8 |
+| **SWE-bench Pro** | 53.5 | 49.5 | +4.0 |
+| **Terminal-Bench 2.0** | 59.3 | 51.5 | +7.8 |
+| **SkillsBench Avg5** | 48.2 | 28.7 | +19.5 |
+| **NL2Repo** | 36.2 | 29.4 | +6.8 |
+| **LiveCodeBench v6** | 83.9 | 80.4 | +3.5 |
 
 #### Knowledge & Reasoning
 
-| Benchmark        | Qwen3.6-27B (Dense) | Qwen3.6-35B-A3B (MoE) | Delta |
-| ---------------- | ------------------- | --------------------- | ----- |
-| **MMLU-Pro**     | 86.2                | 85.2                  | +1.0  |
-| **GPQA Diamond** | 87.8                | 86.0                  | +1.8  |
-| **AIME26**       | 94.1                | 92.7                  | +1.4  |
+| Benchmark | Qwen3.6-27B (Dense) | Qwen3.6-35B-A3B (MoE) | Delta |
+| --- | --- | --- | --- |
+| **MMLU-Pro** | 86.2 | 85.2 | +1.0 |
+| **GPQA Diamond** | 87.8 | 86.0 | +1.8 |
+| **AIME26** | 94.1 | 92.7 | +1.4 |
 
 #### General Agent (35B-A3B only — not directly comparable)
 
 The 35B-A3B card additionally reports agent-specific benchmarks:
 
-| Benchmark      | Qwen3.6-35B-A3B |
-| -------------- | --------------- |
-| **TAU3-Bench** | 67.2            |
-| **MCPMark**    | 37.0            |
-| **MCP-Atlas**  | 62.8            |
-| **WideSearch** | 60.1            |
+| Benchmark | Qwen3.6-35B-A3B |
+| --- | --- |
+| **TAU3-Bench** | 67.2 |
+| **MCPMark** | 37.0 |
+| **MCP-Atlas** | 62.8 |
+| **WideSearch** | 60.1 |
 
 These agent benchmarks are evaluated with different tooling/harnesses than the coding benchmarks and should not be
 directly compared across model families.
@@ -120,8 +129,8 @@ more valuable. However, the absolute throughput still favors MoE by a large marg
 
 ### 2. Quality Retention
 
-- **MoE Fidelity:** The MoE architecture demonstrates robust quantization behavior. At `Q5_K_XL`, it preserves
-  near-BF16 quality (KLD ~0.007) with Unsloth's Dynamic v2.0 selectively upcasting critical layers.
+- **MoE Fidelity:** The MoE architecture demonstrates robust quantization behavior. At `Q5_K_XL`, it preserves near-BF16
+  quality (KLD ~0.007) with Unsloth's Dynamic v2.0 selectively upcasting critical layers.
 - **Unsloth UD Advantage:** Dynamic v2.0 intelligently adjusts quantization types per layer and per model, using a
   > 1.5M token calibration dataset. KL Divergence benchmarks show Unsloth GGUFs on the SOTA Pareto frontier for 21 of 22
   > sizes tested on Qwen3.6-35B-A3B.
@@ -139,31 +148,66 @@ more valuable. However, the absolute throughput still favors MoE by a large marg
 ### 4. GGUF Sources & MTP Configuration
 
 - **MTP-Optimized/UD:** `unsloth/Qwen3.6-27B-MTP-GGUF` and `unsloth/Qwen3.6-35B-A3B-MTP-GGUF`
-- **MTP settings in catalog:** `spec-type = draft-mtp`, `spec-draft-n-max = 3`, `draft-p-min = 0.50` — Unsloth recommends
-  trying values 1-6; `2` is the documented sweet spot at ~83% acceptance rate.
-- **Context window:** NT (flash) = 80,000 tokens — optimized for quick edit and rapid agentic chat where large context is unnecessary overhead; General = 120,000 tokens; Expert = 150,000 tokens; Coder (reason-fast/pro) = 120,000 tokens; Coder-Expert (reason-expert) = 150,000 tokens — balances depth with faster prompt processing. Native support up to 262K, extensible to 1M via YaRN
+- **MTP settings in catalog:** `spec-type = draft-mtp`, `spec-draft-n-max = 3`, `draft-p-min = 0.50` — Unsloth
+  recommends trying values 1-6; `2` is the documented sweet spot at ~83% acceptance rate.
+- **Context window:** NT (flash) = 80,000 tokens — optimized for quick edit and rapid agentic chat where large context
+  is unnecessary overhead; General = 120,000 tokens; Expert = 150,000 tokens; Coder (reason-fast/pro) = 120,000 tokens;
+  Coder-Expert (reason-expert) = 150,000 tokens — balances depth with faster prompt processing. Native support up to
+  262K, extensible to 1M via YaRN
+
+### 5.1 AgentWorld: Language World Model
+
+Qwen-AgentWorld-35B-A3B is a **native language world model** — not a general-purpose LLM. It simulates agentic
+environments via long chain-of-thought reasoning, predicting the next environment state given an agent's action and
+interaction history. Trained on 10M+ real-world interaction trajectories through a three-stage pipeline: CPT
+(environment knowledge) → SFT (next-state-prediction reasoning) → RL (GSPO).
+
+**Seven domains covered:** MCP (tool calling), Search, Terminal, SWE (software engineering), Android, Web, and OS.
+
+**Inference requirements:**
+
+- Native context length: 262,144 tokens; minimum recommended: 128K for multi-turn simulation
+- No MTP speculation (`spec-type = none`) — the model reasons about environment transitions, not draft tokens
+- vLLM requires `--language-model-only --reasoning-parser qwen3` (visual component definitions in architecture but
+  checkpoint is language-only)
+- Recommended sampling: `temperature=0.6`, `top_p=0.95`, `top_k=20`
+- Output length: 32,768 tokens recommended; increase for long multi-step trajectories
+- Domain-specific system prompts required (see `prompts/` directory in GitHub repo)
+
+**Not a replacement for Qwen3.6 MoE/Dense models.** AgentWorld predicts environment observations (terminal output, tool
+responses, GUI states), not general reasoning or code generation tasks.
 
 ### 5. Preset Modes: NT, General, Expert, Coder, and Coder-Expert
 
-The catalog defines five operational presets, all inheriting from the base `[ * ]` defaults (`ctx-size=120000`, `cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
+The catalog defines five operational presets, all inheriting from the base `[ * ]` defaults (`ctx-size=120000`,
+`cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`,
+`repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
 
-- **NT (flash):** `ctx-size=80000`, `enable_thinking=false`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5` — rapid general-purpose tasks, no thinking traces.
-- **General:** `ctx-size=120000`, `presence-penalty=1.5` — inherits base thinking mode + MTP settings; for general reasoning tasks.
+- **NT (flash):** `ctx-size=80000`, `enable_thinking=false`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5` —
+  rapid general-purpose tasks, no thinking traces.
+- **General:** `ctx-size=120000`, `presence-penalty=1.5` — inherits base thinking mode + MTP settings; for general
+  reasoning tasks.
 - **Expert:** `ctx-size=150000`, `presence-penalty=1.5` — 27B Dense model with extended context for deep reasoning.
-- **Coder:** `ctx-size=120000`, `presence-penalty=0.0` — inherits base thinking mode + MTP; for coding tasks (zero presence penalty avoids penalizing code patterns).
-- **Coder-Expert:** `ctx-size=150000`, `presence-penalty=0.0` — 27B Dense model with extended context for complex coding.
+- **Coder:** `ctx-size=120000`, `presence-penalty=0.0` — inherits base thinking mode + MTP; for coding tasks (zero
+  presence penalty avoids penalizing code patterns).
+- **Coder-Expert:** `ctx-size=150000`, `presence-penalty=0.0` — 27B Dense model with extended context for complex
+  coding.
 
 Qwen3.6 operates in thinking mode by default, generating `<think>...</think>` blocks before final responses. The
 Reasoning preset leverages this for precise code generation, research, and decision-making, while NT disables it for
 speed-critical pipelines.
 
+**Simulation (LWM):** Inherits base defaults but overrides: `spec-type=none`, `presence-penalty=1.5`. For environment
+state simulation across 7 domains (MCP, Terminal, SWE, Android, Web, OS, Search). Uses domain-specific system prompts to
+condition the model on the target environment type.
+
 **Sampling parameter nuances across model cards:**
 
-| Parameter        | 27B Thinking (General) | 27B Thinking (Precise) | 35B-A3B Thinking (General) | 35B-A3B Thinking (Precise) |
-| ---------------- | ---------------------- | ---------------------- | -------------------------- | -------------------------- |
-| temperature      | 1.0                    | 0.6                    | 1.0                        | 0.6                        |
-| top_p            | 0.95                   | 0.95                   | 0.95                       | 0.95                       |
-| presence_penalty | 0.0                    | 0.0                    | 1.5                        | 0.0                        |
+| Parameter | 27B Thinking (General) | 27B Thinking (Precise) | 35B-A3B Thinking (General) | 35B-A3B Thinking (Precise) |
+| --- | --- | --- | --- | --- |
+| temperature | 1.0 | 0.6 | 1.0 | 0.6 |
+| top_p | 0.95 | 0.95 | 0.95 | 0.95 |
+| presence_penalty | 0.0 | 0.0 | 1.5 | 0.0 |
 
 The Reasoning preset (`presence_penalty=0.0`) matches both models' precise-task recommendations. The NT preset
 (`presence_penalty=1.5`) matches the 35B-A3B instruct mode. Note that the 27B card recommends `presence_penalty=0.0` for
@@ -178,9 +222,9 @@ For general-purpose agentic workflows and interactive chat, the recommended choi
 (UD)** in NT mode (`flash`). It delivers ~80-110 tok/s with mean KLD of ~0.007 (very close to BF16), making it
 indistinguishable from higher-bit quants for most tasks.
 
-For serious work requiring careful analysis, the recommended choice is **`coder`** — 35B-A3B MoE at `Q5_K_XL` in
-Coder mode. This gives you thinking mode + near-BF16 quality (KLD ~0.007) at ~80-110 tok/s, striking the best
-balance between speed and accuracy for research, analysis, decision-making, and precise coding.
+For serious work requiring careful analysis, the recommended choice is **`coder`** — 35B-A3B MoE at `Q5_K_XL` in Coder
+mode. This gives you thinking mode + near-BF16 quality (KLD ~0.007) at ~80-110 tok/s, striking the best balance between
+speed and accuracy for research, analysis, decision-making, and precise coding.
 
 **Rationale:** The MoE's 3B active parameters + UD v2.0 quantization hit the sweet spot: near-BF16 quality at maximum
 throughput. Dense 27B is reserved only for tasks where its +4% coding benchmark edge justifies a 5-7x throughput
@@ -188,13 +232,14 @@ penalty.
 
 ### Decision Matrix by Use Case
 
-| Tier               | Model ID                                          | Quant        | Mode    | Task Profile         | Est. tok/s | KLD    | Rationale                                                             |
-| ------------------ | ------------------------------------------------- | ------------ | ------- | -------------------- | ---------- | ------ | --------------------------------------------------------------------- |
-| **flash**          | `Qwen3.6-35B-A3B-Q5-IT` (alias: `flash`)          | Q5_K_XL (UD) | NT      | Agentic / Rapid Chat | ~80-110    | ~0.007 | Near-BF16 quality for interactive workflows. Best all-around NT tier. |
-| **general**        | `Qwen3.6-35B-A3B-Q5-general` (alias: `general`)   | Q5_K_XL (UD) | General | General Reasoning    | ~80-110    | ~0.007 | Thinking mode + MTP for general reasoning tasks.                      |
-| **general-expert** | `Qwen3.6-27B-Q5-Expert` (alias: `general-expert`) | Q5_K_XL (UD) | General | Deep Reasoning       | ~14-18     | 0.0455 | 27B Dense with 150K context for deep reasoning.                       |
-| **coder**          | `Qwen3.6-35B-A3B-Q5-Coder` (alias: `coder`)       | Q5_K_XL (UD) | Coder   | Coding / Analysis    | ~80-110    | ~0.007 | MoE speed + thinking mode for coding and analysis.                    |
-| **coder-expert**   | `Qwen3.6-27B-Q5-Coder` (alias: `coder-expert`)    | Q5_K_XL (UD) | Coder   | Complex Coding       | ~14-18     | 0.0455 | 27B Dense with 150K context for complex coding tasks.                 |
+| Tier | Model ID | Quant | Mode | Task Profile | Est. tok/s | KLD | Rationale |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **flash** | `Qwen3.6-35B-A3B-Q5-IT` (alias: `flash`) | Q5_K_XL (UD) | NT | Agentic / Rapid Chat | ~80-110 | ~0.007 | Near-BF16 quality for interactive workflows. Best all-around NT tier. |
+| **general** | `Qwen3.6-35B-A3B-Q5-general` (alias: `general`) | Q5_K_XL (UD) | General | General Reasoning | ~80-110 | ~0.007 | Thinking mode + MTP for general reasoning tasks. |
+| **general-expert** | `Qwen3.6-27B-Q5-Expert` (alias: `general-expert`) | Q5_K_XL (UD) | General | Deep Reasoning | ~14-18 | 0.0455 | 27B Dense with 150K context for deep reasoning. |
+| **coder** | `Qwen3.6-35B-A3B-Q5-Coder` (alias: `coder`) | Q5_K_XL (UD) | Coder | Coding / Analysis | ~80-110 | ~0.007 | MoE speed + thinking mode for coding and analysis. |
+| **coder-expert** | `Qwen3.6-27B-Q5-Coder` (alias: `coder-expert`) | Q5_K_XL (UD) | Coder | Complex Coding | ~14-18 | 0.0455 | 27B Dense with 150K context for complex coding tasks. |
+| **sim-world** | `Qwen-AgentWorld-35B-A3B-Q5` (alias: `agent-sim`) | Q5_K_XL (UD) | LWM | Env. State Prediction | ~60–90 | N/A\* | Native LWM for predicting environment states across 7 domains. Requires domain-specific system prompts. |
 
 **How to choose (pick one):**
 
@@ -203,15 +248,22 @@ penalty.
 3. **Deep reasoning with extended context** → `general-expert` — 27B Dense at 150K context, ~14-18 tok/s
 4. **Everyday coding/analysis** → `coder` — MoE Q5 Coder mode; thinking + MTP for coding tasks
 5. **Complex coding with extended context** → `coder-expert` — 27B Dense at 150K context for complex code tasks
+6. **Agentic environment simulation / tool output prediction** → `agent-sim` — Qwen-AgentWorld-35B-A3B LWM at 262K
+   context; predicts terminal/tool/OS states given agent actions (requires domain-specific system prompt)
 
 **Key design decisions:**
 
 - **MoE dominates for interactive work.** MoE's 3B active parameters deliver 5-7x throughput over Dense 27B.
-- **All catalog presets use Q5_K_XL (UD).** Q4 variants are not included in the current catalog — Q5 provides near-BF16 quality (KLD ~0.007) with acceptable throughput.
+- **All catalog presets use Q5_K_XL (UD).** Q4 variants are not included in the current catalog — Q5 provides near-BF16
+  quality (KLD ~0.007) with acceptable throughput.
 - **`coder` is the coding workhorse.** MoE Q5 Coder mode gives thinking + MTP at ~80-110 tok/s for everyday coding.
 - **`flash` is the NT workhorse.** MoE Q5 NT at ~80-110 tok/s without thinking overhead.
-- **`general` and `coder-expert` extend context.** General (120K) and Expert variants (150K) support longer-context tasks.
+- **`general` and `coder-expert` extend context.** General (120K) and Expert variants (150K) support longer-context
+  tasks.
 - **Dense 27B for precision.** Used only in Expert presets where benchmark edge justifies the throughput cost.
+- **AgentWorld LWM for simulation.** Qwen-AgentWorld-35B-A3B is a native language world model for agentic environment
+  simulation (7 domains: MCP, Search, Terminal, SWE, Android, Web, OS). It is **not** a general-purpose coding/reasoning
+  LLM and should not replace Qwen3.6 MoE/Dense models for interactive chat or coding analysis.
 - **BF16 excluded** — too slow for practical use on DGX Spark; not included as a routing target.
 
 ## Decision Log
@@ -223,14 +275,18 @@ penalty.
 - **Hardware Target**: NVIDIA DGX Spark — GB10 Grace Blackwell (SM121, compute cap 12.1), 6,144 CUDA cores, 128 GB
   unified LPDDR5x (~273 GB/s bandwidth).
 - **MTP Configuration**: `--spec-type draft-mtp --spec-draft-n-max 3` in catalog (Unsloth recommends trying values 1-6;
-  `2` is the documented sweet spot at ~83% acceptance rate). Local catalog uses `3` — may be DGX Spark-specific optimization.
+  `2` is the documented sweet spot at ~83% acceptance rate). Local catalog uses `3` — may be DGX Spark-specific
+  optimization.
 - **Throughput estimates**: All tok/s figures are unmeasured projections derived from bandwidth-limited calculations and
   MTP speedup factors. Unsloth's measured benchmarks (160 tok/s for 27B, 240 tok/s for 35B-A3B on RTX 6000) serve as
   reference points but are not directly comparable due to different memory architectures.
 - **KLD values**: All measured. 35B-A3B by localbench (~250K tokens). 27B by independent researcher using
-  `llama-perplexity` (8192 tokens, KV cache q8_0): UD-Q5_K_XL = 0.0455. Quality bands per
-  smcleod.net scale: <0.005 identical, 0.005–0.02 very close, 0.02–0.05 close, 0.05–0.10 measurable drift, >0.10
-  substantial divergence.
+  `llama-perplexity` (8192 tokens, KV cache q8_0): UD-Q5_K_XL = 0.0455. Quality bands per smcleod.net scale: <0.005
+  identical, 0.005–0.02 very close, 0.02–0.05 close, 0.05–0.10 measurable drift, >0.10 substantial divergence.
+- **AgentWorld addition**: Qwen-AgentWorld-35B-A3B added as a complementary tier for agentic environment simulation.
+  Native LWM (not general-purpose LLM). Covers 7 domains: MCP, Search, Terminal, SWE, Android, Web, OS. Training: CPT →
+  SFT → RL (GSPO) on 10M+ trajectories. Inference: no speculation, 262K context, domain-specific system prompts.
+  Evaluated via AgentWorldBench rubric (Format/Factuality/Consistency/Realism/Quality), not KLD.
 - **Verification**: Benchmark scores verified against official HuggingFace model cards (Qwen/Qwen3.6-27B,
   Qwen/Qwen3.6-35B-A3B). Catalog presets cross-checked against current `qwen3.6-catalog.ini`. Sampling parameters
   cross-checked against both model cards and Unsloth documentation.
@@ -265,3 +321,8 @@ penalty.
 ### Hardware
 
 - DGX Spark (local): GB10 Grace Blackwell, 6,144 CUDA cores, 128 GB LPDDR5x @ ~273 GB/s
+- Qwen-AgentWorld-35B-A3B Model Card: <https://huggingface.co/Qwen/Qwen-AgentWorld-35B-A3B>
+- Unsloth GGUF (Qwen-AgentWorld): <https://huggingface.co/unsloth/Qwen-AgentWorld-35B-A3B-GGUF>
+- Qwen-AgentWorld GitHub + Prompts: <https://github.com/QwenLM/Qwen-AgentWorld>
+- AgentWorldBench Dataset: <https://huggingface.co/datasets/Qwen/AgentWorldBench>
+- Technical Report (arXiv:2606.24597): <https://arxiv.org/abs/2606.24597>

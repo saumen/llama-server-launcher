@@ -77,6 +77,11 @@
       "modelId": "bartowski/nex-agi_Nex-N2-mini-GGUF",
       "localDir": "bartowski/nex-agi_Nex-N2-mini-GGUF",
       "include": ["nex-agi_Nex-N2-mini-Q5_K_M.gguf"]
+    },
+    {
+      "modelId": "deepreinforce-ai/Ornith-1.0-35B-GGUF",
+      "localDir": "deepreinforce-ai/Ornith-1.0-35B-GGUF",
+      "include": ["ornith-1.0-35b-Q5_K_M.gguf"]
     }
   ]
 }

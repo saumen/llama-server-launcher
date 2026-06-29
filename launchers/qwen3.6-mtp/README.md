@@ -6,7 +6,7 @@ Five presets, all inheriting from base `[ * ]` defaults (`ctx-size=120000`, `cac
 
 | Preset | Alias | Model | ctx-size | thinking | presence-penalty | temp | top-p |
 |--------|-------|-------|----------|----------|-----------------|------|-------|
-| NT (flash) | `Qwen3.6-35B-A3B-Q5-IT`, `flash` | 35B-A3B MoE Q5 (UD) | 80000 | off (`reasoning=off`) | 1.5 | 0.7 | 0.80 |
+| NT (flash) | `Qwen3.6-35B-A3B-Q5-IT`, `flash` | 35B-A3B MoE Q5 (UD) | 100000 | off (`reasoning=off`) | 1.5 | 0.7 | 0.80 |
 | General | `Qwen3.6-35B-A3B-Q5-general`, `general` | 35B-A3B MoE Q5 (UD) | 120000 | true (inherited) | 1.5 | — | — |
 | Expert | `Qwen3.6-27B-Q5-Expert`, `general-expert` | 27B Dense Q5 (UD) | 150000 | true (inherited) | 1.5 | — | — |
 | Coder | `Qwen3.6-35B-A3B-Q5-Coder`, `coder` | 35B-A3B MoE Q5 (UD) | 120000 | true (inherited) | 0.0 | — | — |

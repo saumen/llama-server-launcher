@@ -150,10 +150,7 @@ more valuable. However, the absolute throughput still favors MoE by a large marg
 - **MTP-Optimized/UD:** `unsloth/Qwen3.6-27B-MTP-GGUF` and `unsloth/Qwen3.6-35B-A3B-MTP-GGUF`
 - **MTP settings in catalog:** `spec-type = draft-mtp`, `spec-draft-n-max = 3`, `draft-p-min = 0.50` — Unsloth
   recommends trying values 1-6; `2` is the documented sweet spot at ~83% acceptance rate.
-- **Context window:** NT (flash) = 80,000 tokens — optimized for quick edit and rapid agentic chat where large context
-  is unnecessary overhead; General = 120,000 tokens; Expert = 150,000 tokens; Coder (reason-fast/pro) = 120,000 tokens;
-  Coder-Expert (reason-expert) = 150,000 tokens — balances depth with faster prompt processing. Native support up to
-  262K, extensible to 1M via YaRN
+- **Context window:** NT (flash) = 100,000 tokens — quick edit and rapid agentic chat, large context unnecessary; General = 120,000 tokens; Expert = 150,000 tokens; Coder (reason-fast/pro) = 120,000 tokens; Coder-Expert (reason-expert) = 150,000 tokens — balances depth with faster prompt processing. Native support up to 262K, extensible to 1M via YaRN
 
 ### 5.1 AgentWorld: Language World Model
 
@@ -183,7 +180,7 @@ The catalog defines five operational presets, all inheriting from the base `[ * 
 `cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`,
 `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
 
-- **NT (flash):** `ctx-size=80000`, `enable_thinking=false`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5` —
+- **NT (flash):** `ctx-size=100000`, `enable_thinking=false`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5` —
   rapid general-purpose tasks, no thinking traces.
 - **General:** `ctx-size=120000`, `presence-penalty=1.5` — inherits base thinking mode + MTP settings; for general
   reasoning tasks.

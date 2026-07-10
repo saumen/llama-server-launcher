@@ -1,30 +1,31 @@
-# `llama.cpp server` launcher
+# llama-server launcher
 
-A collection of scripts and configurations for launching [`llama.cpp`](https://github.com/ggml-org/llama.cpp)
-server with various GGUF models using optimized settings, including **Multi-Token Prediction (MTP)**
-speculative decoding.
+Scripts and INI presets for launching [`llama.cpp`](https://github.com/ggml-org/llama.cpp) servers with GGUF models, including Multi-Token Prediction (MTP) speculative decoding.
 
-## Quick Start
+## Setup
 
 ### 1. Download Models
 
 ```bash
-./huggingface-scripts/download-models.sh
+cd huggingface-scripts
+./download-models.sh
 ```
 
-See the [HuggingFace scripts README](huggingface-scripts/README.md) for prerequisites,
-single-model downloads, and configuration details.
+Prerequisites: `jq` and the Hugging Face CLI (`pip install huggingface_hub`).
+
+See [huggingface-scripts/README.md](huggingface-scripts/README.md) for single-model downloads, dry-run mode, and configuration.
 
 ### 2. Configure Server Path
 
-Each launcher requires a path to the `llama-server` binary. Create a `.env.launcher` file in the repo root:
+Create a `.env.launcher` file at the repo root:
 
 ```bash
 cp .env.launcher.example .env.launcher
 ```
 
-Then edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` path.
-The `.env.launcher` file is git-ignored so it won't be committed.
+Edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` binary path. The `.env.launcher` file is git-ignored and will not be committed.
+
+For the Gemma launcher, also create a `.env.launcher` inside `launchers/gemma-4-mtp/` with the same `LLAMA_SERVER_BIN` setting — it sources from its own directory, not the repo root.
 
 ### 3. Launch a Server
 
@@ -34,35 +35,69 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 
 ### Root-Level Launchers (Convenience Scripts)
 
-| Script | Description | Default Port(s) |
+| Script | Description | Default Port |
 | --- | --- | --- |
-| `launcher-gemma.sh` | Gemma-4 MTP server (MoE 26B-A4B) | 7080 |
-| `launcher-qwen.sh` | Qwen 3.6 MTP — single instance with 5 routing tiers | 8080 |
+| `./launcher-qwen.sh` | Qwen3.6 MTP — preset tiers (flash, general, coder) | 8080 |
+| `./launcher-qwen3.5-122b-a10b.sh` | Qwen3.5-122B-A10B (122B MoE, 10B active) — standalone launcher | 8081 |
+| `./launcher-gemma.sh` | Gemma-4 MTP server (MoE 26B-A4B) | 7080 |
 
 ### Preset Launchers (`launchers/`)
 
-Each preset directory contains a launcher script and an INI configuration file for fine-tuned model settings.
+Each preset directory contains a launcher script and an INI configuration file with fine-tuned model settings.
 
 | Launcher Path | Model / Family | Port | Notes |
 | --- | --- | --- | --- |
-| `qwen3.6-mtp/` | Qwen3.6 MTP — 5 routing tiers (flash, general, coder, +expert) | 8080 | Single instance with INI catalog configs |
-| `gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
-| `nex-mini/` | Nex-N2-mini (nex-agi) | 8082 | Small-footprint model |
+| `launchers/qwen3.6-mtp/` | Qwen3.6 MTP — preset tiers (flash, general, coder) | 8080 | Single instance with INI catalog configs |
+| `launchers/gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
 
-## Qwen3.6 Model Routing (MoE 35B-A3B / Dense 27B)
+## Expected Workspace Structure
 
-Five routing tiers are available across NT and Reasoning presets — see the full routing guide for benchmarks, KLD quality
-measurements, and a detailed decision matrix.
+```
+llama-server-launcher/
+├── .env.launcher.example          # Template — copy to .env.launcher and set LLAMA_SERVER_BIN
+├── .env.launcher                  # Git-ignored; your actual server binary path
+├── .gitignore                     # Ignores .env.launcher
+├── .markdownlint.json             # Markdown lint configuration
+├── AGENTS.md                      # Developer/AI guidelines
+├── README.md                      # User-facing documentation
+├── launcher-qwen.sh               # Start Qwen3.6 MTP server (port 8080)
+├── launcher-qwen3.5-122b-a10b.sh  # Start Qwen3.5-122B-A10B standalone (port 8081)
+├── launcher-gemma.sh              # Start Gemma-4 MTP server (port 7080)
+│
+├── launchers/                     # Preset directories — INI configs + routing docs
+│   ├── qwen3.6-mtp/
+│   │   ├── qwen3.6-catalog.ini       # Qwen3.6 preset catalog (flash, general, coder)
+│   │   ├── README.md                 # Dev memory: preset values, trial notes
+│   │   └── docs/
+│   │       ├── qwen3.6-model-routing.md      # Benchmarks, KLD, decision matrix
+│   │       └── qwen3.6-recommendations.md    # Cached official Qwen3.6 settings
+│   │
+│   └── gemma-4-mtp/
+│       ├── launcher-gemma-4-mtp.sh     # Gemma MTP server (port 7080)
+│       ├── gemma-4-mtp.ini             # Gemma-4 preset catalog (flash-lite, flash, flash-high, pro)
+│       ├── .env.launcher (create)    # Gemma-specific server binary path (copy from root .env.launcher.example)
+│       └── gemma-4-model-routing.md    # Benchmarks, quantization analysis
+│
+├── docs/                          # Review and analysis documents
+│   └── review/                    # Review artifacts
+│
+└── huggingface-scripts/
+    ├── README.md                  # Download script usage docs
+    ├── download-models.sh         # HF model downloader (reads models.json)
+    └── models.json                # Central model registry: IDs, local dirs, include globs
+```
 
-| Tier | Alias | Mode | Est. tok/s | Use Case |
-| --- | --- | --- | --- | --- |
-| **flash** | `Qwen3.6-35B-A3B-Q5-IT` | NT | ~80–110 | Agentic / rapid chat; near-BF16 quality (KLD ~0.007) |
-| **general** | `Qwen3.6-35B-A3B-Q5-general` | General | ~80–110 | Thinking mode + MTP for everyday reasoning |
-| **general-expert** | `Qwen3.6-27B-Q5-Expert` | General | ~14–18 | 27B Dense with 150K context for deep reasoning |
-| **coder** | `Qwen3.6-35B-A3B-Q5-Coder` | Coder | ~80–110 | MoE speed + thinking for coding and analysis |
-| **coder-expert** | `Qwen3.6-27B-Q5-Coder` | Coder | ~14–18 | 27B Dense with 150K context for complex coding |
+## Qwen3.6 Model Routing (MoE 35B-A3B / Dense 27B / LWM)
 
-_See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for full benchmarks, quality analysis, and the complete decision matrix._
+Three preset tiers are available — see the full routing guide for benchmarks, KLD quality measurements, and a detailed decision matrix.
+
+| Tier | Alias | Model | Mode | Est. tok/s | Use Case |
+| --- | --- | --- | --- | --- | --- |
+| **flash** | `Qwen3.6-35B-A3B-IT` | 35B-A3B MoE Q6_K | NT (non-thinking) | ~80–110 | Agentic / rapid chat; near-BF16 quality (KLD ~0.007) |
+| **general** | `Qwen3.6-35B-A3B-general` | 35B-A3B MoE Q6_K | General | ~80–110 | Thinking mode + MTP for everyday reasoning |
+| **coder** | `Qwen3.6-35B-A3B-Coder` | 35B-A3B MoE Q6_K | Coder | ~80–110 | MoE speed + thinking for coding and analysis |
+
+See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for the full decision matrix including Dense 27B Expert tiers and AgentWorld LWM.
 
 ## Gemma-4 Model Routing (MoE 26B-A4B)
 
@@ -75,45 +110,30 @@ _See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing
 
 _See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis._
 
+## Qwen3.5-122B-A10B Standalone Launcher
+
+The `launcher-qwen3.5-122b-a10b.sh` script launches the Qwen3.5-122B-A10B MoE model (122B total, 10B active) as a standalone server on port 8081. All settings are hardcoded as CLI flags — there is no INI preset file. It uses the UD-Q4_K_XL quantization (sharded across 3 files) with MTP speculative decoding.
+
 ## Thinking Mode Configuration
 
 Launcher presets use reasoning flags and/or chat template kwargs to control thinking mode.
 
-- **Qwen3.6 flash** preset uses `reasoning = off` explicitly
-- **Other Qwen tiers** rely on the inherited
-  `chat-template-kwargs = {"enable_thinking":true}` base default
-- **Gemma-4 presets** use `reasoning = on/off` per tier
-
-| Approach | Example | Layer |
-| --- | --- | --- |
-| `reasoning` (preferred) | `reasoning = on` | llama.cpp native flag — integrates with output parser |
-| `chat-template-kwargs` | `chat-template-kwargs = {"enable_thinking":true}` | Jinja template variable — no parser integration |
-
-**Why `reasoning` is preferred:**
-
-- **Parser integration** — llama.cpp knows reasoning is active, enabling features like extracting thoughts into `reasoning_content` and proper thinking marker handling
-- **Cleaner syntax** — `on`/`off` is readable and unambiguous compared to inline JSON
-- **Model-agnostic** — works even when the chat template doesn't explicitly support `enable_thinking`, because llama.cpp handles the thinking path at the parser level
-- **Future-proof** — part of the evolving reasoning infrastructure alongside `reasoning-budget` and `reasoning-format`
-
-`chat-template-kwargs` remains useful for per-request overrides via the OpenAI-compatible API endpoint.
+- **Qwen3.6 flash** preset explicitly disables thinking (`reasoning = off`)
+- **Qwen3.6 general & coder** presets enable thinking via `chat-template-kwargs` (each section defines them explicitly)
+- **Gemma-4 presets** use `reasoning = on/off` per tier (default `off`; flash-high and pro set `on`)
 
 ## Supported Models (from `huggingface-scripts/models.json`)
 
 | Model | Provider | Quantizations Available |
 | --- | --- | --- |
-| Qwen3.6-27B (Dense + MTP) | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
-| Qwen3.6-35B-A3B (MoE + MTP) | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K |
-| Gemma-4 26B-A4B-it | unsloth / bartowski | Q4_K_M/XL (UD), MTP drafter |
-| Gemma-4 31B-it | unsloth / bartowski | Q4_K_XL (UD) + MTP drafter |
-| Gemma-4 12B-it | unsloth | UD-Q8_K_XL |
-| GLM-4.7-Flash | unsloth | UD-Q5_K_XL |
-| Nex-N2-mini | bartowski | Q5_K_M |
+| Qwen3.6-35B-A3B (MoE + MTP) | unsloth | UD-Q4_K_XL, UD-Q5_K_XL, UD-Q6_K, UD-Q8_K_XL |
+| Qwen3.5-122B-A10B (MoE + MTP) | unsloth | UD-Q4_K_XL |
+| Gemma-4 26B-A4B-it (MoE) | unsloth | UD-Q4_K_M, UD-Q4_K_XL, UD-Q5_K_M, UD-Q5_K_XL, MTP drafter |
+| Gemma-4 31B-it (Dense) | unsloth | UD-Q4_K_XL, MTP drafter |
 
 ## Testing OpenAI-Compatible Endpoints
 
-After launching a server, test its endpoints with `curl`. Replace `PORT` with the
-actual port (e.g., 8080, 8082, or 7080).
+After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port (e.g., 8080 or 7080).
 
 ### Chat Completions
 
@@ -134,3 +154,7 @@ curl http://localhost:PORT/v1/chat/completions \
 ```bash
 curl http://localhost:PORT/v1/models
 ```
+
+---
+
+_Note: This directory is managed by the docs-sync prompt. Manual edits should be handled with care to avoid disrupting system-managed files._

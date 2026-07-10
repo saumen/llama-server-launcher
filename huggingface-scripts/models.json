@@ -3,24 +3,14 @@
 
   "models": [
     {
-      "modelId": "unsloth/Qwen3.6-27B-MTP-GGUF",
-      "localDir": "unsloth/Qwen3.6-27B-MTP-GGUF",
-      "include": ["*mmproj-F32*", "*UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf"]
-    },
-    {
       "modelId": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
       "localDir": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-      "include": ["*mmproj-F32*", "*UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf"]
+      "include": ["*mmproj-F32*", "UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf", "UD-Q8_K_XL.gguf"]
     },
     {
-      "modelId": "unsloth/Qwen-AgentWorld-35B-A3B-GGUF",
-      "localDir": "unsloth/Qwen-AgentWorld-35B-A3B-GGUF",
-      "include": ["mmproj-F32.gguf", "Qwen-AgentWorld-35B-A3B-UD-Q5_K_XL.gguf"]
-    },
-    {
-      "modelId": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
-      "localDir": "google/gemma-4-26B-A4B-it-qat-q4_0-gguf",
-      "include": ["gemma-4-26B_q4_0-it.gguf"]
+      "modelId": "unsloth/Qwen3.5-122B-A10B-MTP-GGUF",
+      "localDir": "unsloth/Qwen3.5-122B-A10B-MTP-GGUF",
+      "include": ["*mmproj-F32*", "*UD-Q4_K_XL*"]
     },
     {
       "modelId": "unsloth/gemma-4-26B-A4B-it-GGUF",
@@ -34,54 +24,9 @@
       ]
     },
     {
-      "modelId": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
-      "localDir": "unsloth/gemma-4-26B-A4B-it-qat-GGUF",
-      "include": ["*qat-UD-Q4_K_XL.gguf"]
-    },
-    {
-      "modelId": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
-      "localDir": "AtomicChat/gemma-4-26B-A4B-it-assistant-GGUF",
-      "include": ["*Q4_K_M.gguf"]
-    },
-    {
-      "modelId": "google/gemma-4-31B-it-qat-q4_0-gguf",
-      "localDir": "google/gemma-4-31B-it-qat-q4_0-gguf",
-      "include": ["gemma-4-31B_q4_0-it.gguf"]
-    },
-    {
       "modelId": "unsloth/gemma-4-31B-it-GGUF",
       "localDir": "unsloth/gemma-4-31B-it-GGUF",
       "include": ["*UD-Q4_K_XL.gguf", "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"]
-    },
-    {
-      "modelId": "unsloth/gemma-4-31B-it-qat-GGUF",
-      "localDir": "unsloth/gemma-4-31B-it-qat-GGUF",
-      "include": ["*qat-UD-Q4_K_XL.gguf", "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"]
-    },
-    {
-      "modelId": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
-      "localDir": "AtomicChat/gemma-4-31B-it-assistant-GGUF",
-      "include": ["*Q4_K_M.gguf"]
-    },
-    {
-      "modelId": "unsloth/gemma-4-12B-it-GGUF",
-      "localDir": "unsloth/gemma-4-12B-it-GGUF",
-      "include": ["*UD-Q8_K_XL.gguf"]
-    },
-    {
-      "modelId": "unsloth/GLM-4.7-Flash-GGUF",
-      "localDir": "unsloth/GLM-4.7-Flash-GGUF",
-      "include": ["*UD-UD-Q5_K_XL.gguf"]
-    },
-    {
-      "modelId": "bartowski/nex-agi_Nex-N2-mini-GGUF",
-      "localDir": "bartowski/nex-agi_Nex-N2-mini-GGUF",
-      "include": ["nex-agi_Nex-N2-mini-Q5_K_M.gguf"]
-    },
-    {
-      "modelId": "deepreinforce-ai/Ornith-1.0-35B-GGUF",
-      "localDir": "deepreinforce-ai/Ornith-1.0-35B-GGUF",
-      "include": ["ornith-1.0-35b-Q5_K_M.gguf"]
     }
   ]
 }

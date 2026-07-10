@@ -2,7 +2,7 @@
 
 ## Catalog presets (qwen3.6-catalog.ini)
 
-Five presets, all inheriting from base `[ * ]` defaults (`ctx-size=120000`, `cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
+Seven presets total (five Qwen3.6 MTP + two Qwen3.5-122B non-MTP), all inheriting from base `[ * ]` defaults (`ctx-size=120000`, `cache-type-k/v=f16`, `enable_thinking=true`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`):
 
 | Preset | Alias | Model | ctx-size | thinking | presence-penalty | temp | top-p |
 |--------|-------|-------|----------|----------|-----------------|------|-------|
@@ -11,12 +11,15 @@ Five presets, all inheriting from base `[ * ]` defaults (`ctx-size=120000`, `cac
 | Expert | `Qwen3.6-27B-Q5-Expert`, `general-expert` | 27B Dense Q5 (UD) | 150000 | true (inherited) | 1.5 | — | — |
 | Coder | `Qwen3.6-35B-A3B-Q5-Coder`, `coder` | 35B-A3B MoE Q5 (UD) | 120000 | true (inherited) | 0.0 | — | — |
 | Coder-Expert | `Qwen3.6-27B-Q5-Coder`, `coder-expert` | 27B Dense Q5 (UD) | 150000 | true (inherited) | 0.0 | — | — |
+| Qwen3.5-122B NT (flash) | `Qwen3.5-122B-A10B-Q5-NT`, `qwen-122b-flash` | 122B-A10B MoE Q5 (UD) | 65536 | off (`reasoning=off`) | 1.5 | 0.7 | 0.80 |
+| Qwen3.5-122B General | `Qwen3.5-122B-A10B-Q5-general`, `qwen-122b` | 122B-A10B MoE Q5 (UD) | 131072 | true (inherited) | 1.5 | — | — |
 
 **Notes:**
 
 - NT preset overrides: `reasoning=off`, `chat-template-kwargs={"enable_thinking":false}`, `temperature=0.7`, `top-p=0.80`
 - Coder presets: `presence-penalty=0.0` (zero penalty avoids penalizing code patterns)
 - General/Expert presets: inherit base temperature/top-p, only override `presence-penalty=1.5`
+- Qwen3.5-122B-A10B presets: `spec-type=none` (no MTP layers in Qwen3.5), `mmproj` set for multimodal support
 
 ## Infinite thinking loop fix — Qwen3.6-35B-A3B
 
@@ -51,6 +54,15 @@ Base `[ * ]` preset sets `repeat-penalty = 1.0`. This is the no-op value — rep
 - `spec-type = draft-mtp`, `spec-draft-n-max = 3`, `draft-p-min = 0.50`
 - Unsloth recommends `--spec-draft-n-max 2` (83% acceptance rate), but catalog uses `3` — may be DGX Spark-specific optimization
 - All presets inherit MTP settings from base `[ * ]`
+
+## Qwen3.5-122B-A10B presets
+
+Two presets for the Qwen3.5-122B-A10B MoE model (10B active params, no MTP). This is Qwen3.5 (not 3.6) — it has no MTP layers, so `spec-type=none` overrides the base `draft-mtp` default. Both presets include `mmproj` for multimodal support.
+
+| Preset | Alias | ctx-size | thinking | presence-penalty | temp | top-p |
+|--------|-------|----------|----------|-----------------|------|-------|
+| NT (flash) | `Qwen3.5-122B-A10B-Q5-NT`, `qwen-122b-flash` | 65536 | off | 1.5 | 0.7 | 0.80 |
+| General | `Qwen3.5-122B-A10B-Q5-general`, `qwen-122b` | 131072 | true | 1.5 | — | — |
 
 ## Trial and error notes
 

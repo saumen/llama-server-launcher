@@ -87,40 +87,43 @@ llama-server-launcher/
     └── models.json                # Central model registry: IDs, local dirs, include globs
 ```
 
-## Qwen3.6 Model Routing (MoE 35B-A3B / Dense 27B / LWM)
+## Qwen3.6 Model Routing (MoE 35B-A3B)
 
-Three preset tiers are available — see the full routing guide for benchmarks, KLD quality measurements, and a detailed decision matrix.
+Three preset tiers are available — all use the same `Q5_K_XL` quantized model with MTP speculative decoding.
 
-| Tier | Alias | Model | Mode | Est. tok/s | Use Case |
-| --- | --- | --- | --- | --- | --- |
-| **flash** | `Qwen3.6-35B-A3B-IT` | 35B-A3B MoE Q6_K | NT (non-thinking) | ~80–110 | Agentic / rapid chat; near-BF16 quality (KLD ~0.007) |
-| **general** | `Qwen3.6-35B-A3B-general` | 35B-A3B MoE Q6_K | General | ~80–110 | Thinking mode + MTP for everyday reasoning |
-| **coder** | `Qwen3.6-35B-A3B-Coder` | 35B-A3B MoE Q6_K | Coder | ~80–110 | MoE speed + thinking for coding and analysis |
+| Tier | Alias | Mode | Est. tok/s | Use Case |
+| --- | --- | --- | --- | --- |
+| **flash** | `Qwen3.6-35B-A3B-IT`, `flash` | Non-thinking | ~80–110 | Agentic / rapid chat; high throughput |
+| **general** | `Qwen3.6-35B-A3B-general`, `general` | Thinking (reasoning=on) | ~80–110 | Everyday reasoning with MTP |
+| **coder** | `Qwen3.6-35B-A3B-Coder`, `coder` | Thinking (reasoning=on) | ~80–110 | Coding and analysis; zero presence penalty |
 
-See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for the full decision matrix including Dense 27B Expert tiers and AgentWorld LWM.
+See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.md) for the full benchmark data and decision matrix.
 
 ## Gemma-4 Model Routing (MoE 26B-A4B)
 
-| Tier | Quantization | Task Profile | Use Case |
-| --- | --- | --- | --- |
-| **flash-lite** | Q4_K_M (UD) | High-Volume | Log analysis, data cleaning |
-| **flash** | Q4_K_XL (UD) | Agentic / Rapid Chat | Boilerplate, documentation |
-| **flash-high** | Q5_K_M | Logic / Math / Code | Debugging, math proofs |
-| **pro** | Q5_K_XL | High-Stakes / Batch | Legal/medical, migration |
+| Tier | Quantization | Alias | Task Profile | Use Case |
+| --- | --- | --- | --- | --- |
+| **flash-lite** | Q4_K_M (UD) | `gemma-4-flash-lite` | High-Volume | Log analysis, data cleaning |
+| **flash** | Q4_K_XL (UD) | `gemma-4-flash` | Agentic / Rapid Chat | Boilerplate, documentation |
+| **flash-high** | Q5_K_M | `gemma-4-flash-high` | Logic / Math / Code | Debugging, math proofs |
+| **pro** | Q5_K_XL | `gemma-4-pro` | High-Stakes / Batch | Legal/medical, migration |
 
-_See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis._
+_flash-high and pro tiers enable thinking mode (`reasoning = on`)._
+
+See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis.
 
 ## Qwen3.5-122B-A10B Standalone Launcher
 
-The `launcher-qwen3.5-122b-a10b.sh` script launches the Qwen3.5-122B-A10B MoE model (122B total, 10B active) as a standalone server on port 8081. All settings are hardcoded as CLI flags — there is no INI preset file. It uses the UD-Q4_K_XL quantization (sharded across 3 files) with MTP speculative decoding.
+The `launcher-qwen3.5-122b-a10b.sh` script launches the Qwen3.5-122B-A10B MoE model (122B total, 10B active) as a standalone server on port 8081. All settings are hardcoded as CLI flags — there is no INI preset file. It uses the UD-Q4_K_XL quantization (sharded across 3 files) with MTP speculative decoding and non-thinking mode.
 
 ## Thinking Mode Configuration
 
-Launcher presets use reasoning flags and/or chat template kwargs to control thinking mode.
+Launcher presets use `reasoning = on/off` to control thinking mode.
 
 - **Qwen3.6 flash** preset explicitly disables thinking (`reasoning = off`)
-- **Qwen3.6 general & coder** presets enable thinking via `chat-template-kwargs` (each section defines them explicitly)
-- **Gemma-4 presets** use `reasoning = on/off` per tier (default `off`; flash-high and pro set `on`)
+- **Qwen3.6 general & coder** presets enable thinking (`reasoning = on`)
+- **Gemma-4 flash-lite & flash** presets disable thinking (default `off`)
+- **Gemma-4 flash-high & pro** presets enable thinking (`reasoning = on`)
 
 ## Supported Models (from `huggingface-scripts/models.json`)
 

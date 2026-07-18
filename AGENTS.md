@@ -101,7 +101,7 @@ This is a shell/INI configuration project — there is no build step or test sui
 ### Patterns to follow
 
 - **INI preset inheritance:** All presets inherit from `[ * ]` base defaults. Only override what differs; do not repeat base values in every preset.
-- **Thinking mode:** Prefer `reasoning = on/off` (llama.cpp native flag) over `chat-template-kwargs` for per-preset thinking control.
+- **Thinking mode:** Use `reasoning = on/off` (llama.cpp native flag) for per-preset thinking control. Do NOT use `chat-template-kwargs`.
 - **MTP config:** Qwen uses `spec-draft-n-max = 3` (DGX Spark-specific); Gemma uses `spec-draft-n-max = 2` (Unsloth recommended sweet spot).
 - **Model paths:** INI configs use absolute paths. The `models.json` download manifest uses portable HuggingFace model IDs. These are not currently linked — path resolution is manual.
 - **Launcher scripts:** Root-level launchers (`launcher-qwen.sh`, `launcher-gemma.sh`) are convenience entry points. The real logic lives in `launchers/*/`.
@@ -116,15 +116,23 @@ Section names follow the pattern `[unsloth/<model-name>-<quant>-MTP-<mode>]` for
 
 ### Qwen3.6 Catalog (`qwen3.6-catalog.ini`)
 
-- **Base `[ * ]` defaults:** `ctx-size=256000`, `cache-type-k/v=f16`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`.
-- **NT (flash) preset overrides:** `reasoning=off`, `chat-template-kwargs={"enable_thinking":false}`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5`.
-- **Coder preset:** `presence-penalty=0.0` (zero penalty avoids penalizing code patterns).
+Verified against `launchers/qwen3.6-mtp/qwen3.6-catalog.ini`:
+
+- **Base `[ * ]` defaults:** `ctx-size=175000`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `temperature=0.6`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`, `spec-draft-type-k=q8_0`, `spec-draft-type-v=q8_0`.
+- **Flash preset (`unsloth/Qwen3.6-35B-A3B-UD-Q5_K_XL-NT`):** aliases `Qwen3.6-35B-A3B-IT, flash`; overrides: `reasoning=off`, `temperature=0.7`, `top-p=0.80`, `presence-penalty=1.5`.
+- **General preset (`unsloth/Qwen3.6-35B-A3B-UD-Q5_K_XL-General`):** aliases `Qwen3.6-35B-A3B-general, general`; overrides: `reasoning=on`, `presence-penalty=1.5`.
+- **Coder preset (`unsloth/Qwen3.6-35B-A3B-UD-Q5_K_XL-Coder`):** aliases `Qwen3.6-35B-A3B-Coder, coder`; overrides: `reasoning=on`, `presence-penalty=0.0`.
 - GPU offload is set via CLI flags in `launcher-qwen.sh` (`--gpu-layers all`, `--gpu-layers-draft all`), not in the INI.
 
 ### Gemma-4 Catalog (`gemma-4-mtp.ini`)
 
-- **Base `[ * ]` defaults:** `ctx-size=150000`, `n-gpu-layers=55` (structural offset for sparse gating — true layers are 48), `temp=1.0`, `top-p=0.95`, `top-k=64`, `cache-type-k/v=f16`, `reasoning=off`.
+Verified against `launchers/gemma-4-mtp/gemma-4-mtp.ini`:
+
+- **Base `[ * ]` defaults:** `ctx-size=150000`, `n-gpu-layers=55` (structural offset for sparse gating — true layers are 48), `temp=1.0`, `top-p=0.95`, `top-k=64`, `cache-type-k=f16`, `cache-type-v=f16`, `reasoning=off`.
 - **MTP:** `spec-type=draft-mtp`, `spec-draft-n-max=2`, `draft-p-min=0.50`.
-- flash-high and pro tiers override `reasoning=on` for reasoning-intensive tasks.
+- **flash-lite (`Q4_K_M`):** aliases `gemma-4-26B-A4B-Q4_K_M, gemma-4-flash-lite`; non-thinking.
+- **flash (`Q4_K_XL`):** aliases `gemma-4-26B-A4B-Q4_K_XL, gemma-4-flash`; non-thinking.
+- **flash-high (`Q5_K_M`):** aliases `gemma-4-26B-A4B-Q5_K_M, gemma-4-flash-high`; overrides `reasoning=on`.
+- **pro (`Q5_K_XL`):** aliases `gemma-4-26B-A4B-Q5_K_XL, gemma-4-pro`; overrides `reasoning=on`.
 - All tiers use the same MTP drafter: `gemma-4-26B-A4B-it-MTP-Q8_0.gguf`.
 - `mmproj` path in base defaults points to the BF16 vision projector for multimodal support.

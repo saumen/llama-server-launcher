@@ -39,7 +39,7 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 | --- | --- | --- |
 | `./launcher-qwen.sh` | Qwen3.6 MTP — preset tiers (flash, general, coder) | 8080 |
 | `./launcher-qwen3.5-122b-a10b.sh` | Qwen3.5-122B-A10B (122B MoE, 10B active) — standalone launcher | 8081 |
-| `./launcher-gemma.sh` | Gemma-4 MTP server (MoE 26B-A4B) | 7080 |
+| `./launcher-gemma.sh` | Start Gemma-4 MTP server (port 8080) |
 
 ### Preset Launchers (`launchers/`)
 
@@ -48,7 +48,7 @@ Each preset directory contains a launcher script and an INI configuration file w
 | Launcher Path | Model / Family | Port | Notes |
 | --- | --- | --- | --- |
 | `launchers/qwen3.6-mtp/` | Qwen3.6 MTP — preset tiers (flash, general, coder) | 8080 | Single instance with INI catalog configs |
-| `launchers/gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 7080 | Primary daily-driver; Unsloth UD quantization |
+| `launchers/gemma-4-mtp/` | Gemma-4 26B-A4B MTP (MoE) | 8080 | Single preset (Q5_K_XL); Unsloth UD quantization |
 
 ## Expected Workspace Structure
 
@@ -62,7 +62,7 @@ llama-server-launcher/
 ├── README.md                      # User-facing documentation
 ├── launcher-qwen.sh               # Start Qwen3.6 MTP server (port 8080)
 ├── launcher-qwen3.5-122b-a10b.sh  # Start Qwen3.5-122B-A10B standalone (port 8081)
-├── launcher-gemma.sh              # Start Gemma-4 MTP server (port 7080)
+├── launcher-gemma.sh              # Start Gemma-4 MTP server (port 8080)
 │
 ├── launchers/                     # Preset directories — INI configs + routing docs
 │   ├── qwen3.6-mtp/
@@ -73,8 +73,8 @@ llama-server-launcher/
 │   │       └── qwen3.6-recommendations.md    # Cached official Qwen3.6 settings
 │   │
 │   └── gemma-4-mtp/
-│       ├── launcher-gemma-4-mtp.sh     # Gemma MTP server (port 7080)
-│       ├── gemma-4-mtp.ini             # Gemma-4 preset catalog (flash-lite, flash, flash-high, pro)
+│       ├── launcher-gemma-4-mtp.sh     # Gemma MTP server (port 8080)
+│       ├── gemma-4-mtp.ini             # Gemma-4 preset catalog (single Q5_K_XL tier)
 │       ├── .env.launcher (create)    # Gemma-specific server binary path (copy from root .env.launcher.example)
 │       └── gemma-4-model-routing.md    # Benchmarks, quantization analysis
 │
@@ -101,16 +101,13 @@ See [qwen3.6-model-routing.md](launchers/qwen3.6-mtp/docs/qwen3.6-model-routing.
 
 ## Gemma-4 Model Routing (MoE 26B-A4B)
 
-| Tier | Quantization | Alias | Task Profile | Use Case |
-| --- | --- | --- | --- | --- |
-| **flash-lite** | Q4_K_M (UD) | `gemma-4-flash-lite` | High-Volume | Log analysis, data cleaning |
-| **flash** | Q4_K_XL (UD) | `gemma-4-flash` | Agentic / Rapid Chat | Boilerplate, documentation |
-| **flash-high** | Q5_K_M | `gemma-4-flash-high` | Logic / Math / Code | Debugging, math proofs |
-| **pro** | Q5_K_XL | `gemma-4-pro` | High-Stakes / Batch | Legal/medical, migration |
+Currently configured with a single preset tier:
 
-_flash-high and pro tiers enable thinking mode (`reasoning = on`)._
+| Tier | Quantization | Alias | Task Profile |
+| --- | --- | --- | --- |
+| **pro** | Q5_K_XL | `gemma-4-26B-A4B-Q5_K_XL` | High-Stakes / Batch |
 
-See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for full benchmarks and analysis.
+See [gemma-4-model-routing.md](launchers/gemma-4-mtp/gemma-4-model-routing.md) for benchmarks and analysis on planned tier expansions.
 
 ## Qwen3.5-122B-A10B Standalone Launcher
 
@@ -122,8 +119,7 @@ Launcher presets use `reasoning = on/off` to control thinking mode.
 
 - **Qwen3.6 flash** preset explicitly disables thinking (`reasoning = off`)
 - **Qwen3.6 general & coder** presets enable thinking (`reasoning = on`)
-- **Gemma-4 flash-lite & flash** presets disable thinking (default `off`)
-- **Gemma-4 flash-high & pro** presets enable thinking (`reasoning = on`)
+- **Gemma-4 pro** preset uses the single available tier (default `reasoning = off`)
 
 ## Supported Models (from `huggingface-scripts/models.json`)
 
@@ -136,7 +132,7 @@ Launcher presets use `reasoning = on/off` to control thinking mode.
 
 ## Testing OpenAI-Compatible Endpoints
 
-After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port (e.g., 8080 or 7080).
+After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port (8080 for Qwen or Gemma, 8081 for Qwen3.5-122B standalone).
 
 ### Chat Completions
 

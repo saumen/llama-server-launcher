@@ -40,9 +40,9 @@ llama-server-launcher/
 │   │       └── qwen3.6-recommendations.md # Cached official Qwen settings
 │   │
 │   └── gemma-4-mtp/
-│       ├── launcher-gemma-4-mtp.sh  # Gemma MTP server on port 7080
-│       ├── gemma-4-mtp.ini          # INI preset catalog: 4 Gemma tiers + base defaults
-│       └── gemma-4-model-routing.md # Benchmarks, quantization analysis, decision matrix
+│       ├── launcher-gemma-4-mtp.sh  # Gemma MTP server (port 8080)
+│       ├── gemma-4-mtp.ini          # INI preset catalog (single Q5_K_XL tier)
+│       └── gemma-4-model-routing.md # Benchmarks, quantization analysis
 │
 ├── docs/
 │   └── review/                      # Review artifacts
@@ -61,7 +61,7 @@ This is a shell/INI configuration project — there is no build step or test sui
 |---|---|
 |`./launcher-qwen.sh`|Start Qwen3.6 MTP server on port 8080|
 |`./launcher-qwen3.5-122b-a10b.sh`|Start Qwen3.5-122B-A10B standalone server on port 8081|
-|`./launcher-gemma.sh`|Start Gemma-4 MTP server on port 7080|
+|`./launcher-gemma.sh`|Start Gemma-4 MTP server on port 8080|
 |`./huggingface-scripts/download-models.sh`|Download all models from `models.json`|
 |`./huggingface-scripts/download-models.sh --list`|List available model IDs|
 |`./huggingface-scripts/download-models.sh --dry-run`|Preview downloads without executing|
@@ -74,6 +74,8 @@ This is a shell/INI configuration project — there is no build step or test sui
 - Logs are written to `/tmp/YYYY-MM-DD-llama-qwen3.6/qwen3.6-catalog.log` by the Qwen launcher.
 - The Gemma launcher (`launcher-gemma.sh`) is a thin wrapper that sources `launchers/gemma-4-mtp/launcher-gemma-4-mtp.sh`.
 - `launcher-gemma-4-mtp.sh` references the INI via tilde path (`~/workspace/github/saumen/llama-server-launcher/...`), not `$SCRIPT_DIR`.
+
+**Warning:** Both Qwen and Gemma launchers use port 8080. Run only one at a time, or modify the port in the launcher script before starting a second instance.
 
 ## Commit & Pull Request Guidelines
 
@@ -128,11 +130,8 @@ Verified against `launchers/qwen3.6-mtp/qwen3.6-catalog.ini`:
 
 Verified against `launchers/gemma-4-mtp/gemma-4-mtp.ini`:
 
-- **Base `[ * ]` defaults:** `ctx-size=150000`, `n-gpu-layers=55` (structural offset for sparse gating — true layers are 48), `temp=1.0`, `top-p=0.95`, `top-k=64`, `cache-type-k=f16`, `cache-type-v=f16`, `reasoning=off`.
-- **MTP:** `spec-type=draft-mtp`, `spec-draft-n-max=2`, `draft-p-min=0.50`.
-- **flash-lite (`Q4_K_M`):** aliases `gemma-4-26B-A4B-Q4_K_M, gemma-4-flash-lite`; non-thinking.
-- **flash (`Q4_K_XL`):** aliases `gemma-4-26B-A4B-Q4_K_XL, gemma-4-flash`; non-thinking.
-- **flash-high (`Q5_K_M`):** aliases `gemma-4-26B-A4B-Q5_K_M, gemma-4-flash-high`; overrides `reasoning=on`.
-- **pro (`Q5_K_XL`):** aliases `gemma-4-26B-A4B-Q5_K_XL, gemma-4-pro`; overrides `reasoning=on`.
+**Base `[ * ]` defaults:** `ctx-size=150000`, `temp=1.0`, `top-p=0.95`, `top-k=64`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `spec-type=draft-mtp`, `spec-draft-n-max=2`, `draft-p-min=0.50`.
+- **Single preset (`unsloth/gemma-4-26B-A4B-Q5_K_XL-NT`):** alias `gemma-4-26B-A4B-Q5_K_XL`; non-thinking by default.
 - All tiers use the same MTP drafter: `gemma-4-26B-A4B-it-MTP-Q8_0.gguf`.
 - `mmproj` path in base defaults points to the BF16 vision projector for multimodal support.
+- GPU offload is set via CLI flags (`--gpu-layers all`, `--gpu-layers-draft all`), not in the INI.

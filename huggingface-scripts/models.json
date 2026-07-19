@@ -5,7 +5,7 @@
     {
       "modelId": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
       "localDir": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-      "include": ["*mmproj-F32*", "UD-Q4_K_XL.gguf", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf", "UD-Q8_K_XL.gguf"]
+      "include": ["*mmproj-F32*", "*UD-Q5_K_XL.gguf", "*UD-Q6_K.gguf"]
     },
     {
       "modelId": "unsloth/Qwen3.5-122B-A10B-MTP-GGUF",
@@ -16,9 +16,6 @@
       "modelId": "unsloth/gemma-4-26B-A4B-it-GGUF",
       "localDir": "unsloth/gemma-4-26B-A4B-it-GGUF",
       "include": [
-        "gemma-4-26B-A4B-it-UD-Q4_K_M.gguf",
-        "gemma-4-26B-A4B-it-UD-Q4_K_XL.gguf",
-        "gemma-4-26B-A4B-it-UD-Q5_K_M.gguf",
         "gemma-4-26B-A4B-it-UD-Q5_K_XL.gguf",
         "MTP/gemma-4-26B-A4B-it-MTP-Q8_0.gguf"
       ]
@@ -26,7 +23,10 @@
     {
       "modelId": "unsloth/gemma-4-31B-it-GGUF",
       "localDir": "unsloth/gemma-4-31B-it-GGUF",
-      "include": ["*UD-Q4_K_XL.gguf", "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"]
+      "include": [
+        "*UD-Q5_K_XL.gguf",
+        "MTP/gemma-4-31B-it-MTP-Q8_0.gguf"
+      ]
     }
   ]
 }

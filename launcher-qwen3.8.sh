@@ -27,6 +27,7 @@ preset='qwen3.8-catalog'
 	--device CUDA0 \
 	--spec-draft-device CUDA0 \
 	--image-min-tokens 1024 \
+	--metrics \
 	--log-colors on \
 	--log-timestamps \
 	--log-file "${log_dir}/${preset}.log"

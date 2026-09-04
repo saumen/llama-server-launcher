@@ -17,8 +17,7 @@ preset='qwen3.6-catalog'
 "${LLAMA_SERVER_BIN}" \
 	--models-preset "$SCRIPT_DIR/launchers/qwen3.6-mtp/${preset}.ini" \
 	--host 0.0.0.0 \
-	--port 8080 \
-	--models-max 3 \
+	--port 8036 \
 	--flash-attn on \
 	--cont-batching \
 	--jinja \
@@ -27,6 +26,7 @@ preset='qwen3.6-catalog'
 	--device CUDA0 \
 	--spec-draft-device CUDA0 \
 	--image-min-tokens 1024 \
+	--metrics \
 	--log-colors on \
 	--log-timestamps \
 	--log-file "${log_dir}/${preset}.log"

@@ -2,20 +2,21 @@
 
 ## Catalog presets (qwen3.8-catalog.ini)
 
-Two presets total, both for the same GGUF, inheriting from base `[ * ]` defaults (`ctx-size=175000`, `cache-type-k/v=q8_0`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`, `spec-draft-type-k/v=q8_0`):
+One preset total (Qwen3.8-27B expert NT), inheriting from base `[ * ]` defaults (`ctx-size=262144`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`, `spec-draft-type-k=q8_0`, `spec-draft-type-v=q8_0`):
 
-| Preset | Alias | Model | ctx-size | thinking | temp | top-p | presence-penalty |
-|--------|-------|-------|----------|----------|------|-------|-----------------|
-| General (thinking) | `Qwen3.8-27B-general`, `general` | 27B Dense Q5 (UD) | 175000 | on (`reasoning=on`) | 1.0 | 0.95 | 0.0 |
-| NT (instruct) | `Qwen3.8-27B-IT`, `flash` | 27B Dense Q5 (UD) | 175000 | off (`reasoning=off`) | 0.7 | 0.80 | 1.5 |
+| Preset | Alias | Model | Quantization | thinking | temp | top-p | presence-penalty |
+|--------|-------|-------|--------------|----------|------|-------|-----------------|
+| Expert (NT) | `qwen3.8-expert` | 27B Dense | Q6_K_XL | off (`reasoning=off`) | 0.6 | 0.90 | 1.5 |
 
 **Notes:**
 
 - Per-mode sampling follows the [Unsloth Qwen3.8 recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings) — Qwen3.8-27B is a **hybrid thinking** model with different defaults per mode:
   - Thinking: `temperature=1.0`, `top-p=0.95`, `top-k=20`, `min-p=0.0`, `presence-penalty=0.0`, `repetition_penalty=1.0`
   - Instruct: `temperature=0.7`, `top-p=0.80`, `top-k=20`, `min-p=0.0`, `presence-penalty=1.5`, `repetition_penalty=1.0`
+- Current preset uses non-thinking overrides (`reasoning=off`, `temperature=0.6`, `top-p=0.90`, `presence-penalty=1.5`) that differ from both Unsloth defaults — this is an expert/proofreading profile.
 - `top-k`, `min-p`, `repeat-penalty` are identical in both modes, so they live in base `[ * ]` only
-- `model` path uses the HF cache snapshot dir (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/fe1e2a23d973adb629709749dc4f6756df66ef10/`) — this is the `hf download` *without* `--local-dir` layout, unlike the other models in `models.json` which use `--local-dir` flat layout
+- `model` path uses the HF cache snapshot dir (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/4ca720788d1e01f1bff70c033e0d0028fd02e502/`); the model is not in `models.json`.
+- mmproj path: `models--unsloth--Qwen3.8-27B-GGUF/snapshots/4ca720788d1e01f1bff70c033e0d0028fd02e502/mmproj-F16.gguf`
 
 ## MTP configuration
 
@@ -26,12 +27,10 @@ Two presets total, both for the same GGUF, inheriting from base `[ * ]` defaults
 ## Thinking mode
 
 - Uses `reasoning = on/off` (llama.cpp native flag) for per-preset thinking control. Do NOT use `chat-template-kwargs`.
-- General preset sets `reasoning = on`; NT preset sets `reasoning = off`
 
 ## Trial and error notes
 
 - GPU offload is set via CLI flags on `launcher-qwen3.8.sh` (`--gpu-layers all`, `--gpu-layers-draft all`), not in the INI preset. The Qwen3.8 catalog has no `n-gpu-layers` entries.
-- **Port conflict:** `launcher-qwen3.8.sh` uses port 8080, same as `launcher-qwen.sh` and `launcher-gemma.sh`. Run only one at a time, or change the port before starting a second instance.
 - The model is NOT in `huggingface-scripts/models.json` (it was downloaded manually into the snapshot layout). If adding it to the registry, note the download script uses `--local-dir` flat layout, which would produce a different path than the one in the INI.
 
 ## Read as needed

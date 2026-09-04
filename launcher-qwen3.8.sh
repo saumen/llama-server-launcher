@@ -18,7 +18,7 @@ preset='qwen3.8-catalog'
 	--models-preset "$SCRIPT_DIR/launchers/qwen3.8-mtp/${preset}.ini" \
 	--host 0.0.0.0 \
 	--port 8888 \
-	--models-max 3 \
+	--models-max 1 \
 	--flash-attn on \
 	--cont-batching \
 	--jinja \

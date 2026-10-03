@@ -1,7 +1,7 @@
 # llama-server launcher
 
 Scripts and INI presets for launching [`llama.cpp`](https://github.com/ggml-org/llama.cpp) servers with GGUF models,
-  including Multi-Token Prediction (MTP) speculative decoding.
+including Multi-Token Prediction (MTP) speculative decoding.
 
 ## Setup
 
@@ -16,7 +16,7 @@ bash /path/to/llama-server-launcher/compiler.sh
 ```
 
 This clones/checks out llama.cpp at a configurable tag (default `v0.3.0`), builds with CUDA, and copies binaries into
-  the source tree. The build output path is printed on success.
+the source tree. The build output path is printed on success.
 
 Alternatively, use a pre-built `llama-server` binary from a llama.cpp release.
 
@@ -29,7 +29,7 @@ cp .env.launcher.example .env.launcher
 ```
 
 Edit `.env.launcher` and set `LLAMA_SERVER_BIN` to your actual `llama-server` binary path. The `.env.launcher` file is
-  git-ignored and will not be committed.
+git-ignored and will not be committed.
 
 The default example also sets:
 
@@ -47,9 +47,10 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 | --- | --- | --- |
 | `./launcher-qwen3.6.sh` | Qwen3.6 MTP — NT/flash preset (Q6_K quantization) | 8036 |
 | `./launcher-qwen3.8.sh` | Qwen3.8-27B MTP — expert preset (Q6_K_XL quantization) | 8888 |
+| `./launcher-qwen-hybrid.sh` | Hybrid — Qwen3.6 + Qwen3.8 in one server (two presets) | 8888 |
 
-Both launchers run on `0.0.0.0`, use flash attention, continuous batching, Jinja chat template, full GPU offload, and
-  emit Prometheus metrics (`--metrics`). Logs are written to `/tmp/YYYY-MM-DD-llama-qwen3.N/qwen3.N-catalog.log`.
+All three launchers run on `0.0.0.0`, use flash attention, continuous batching, Jinja chat template, full GPU offload,
+and emit Prometheus metrics (`--metrics`). Logs are written to `/tmp/YYYY-MM-DD-llama-qwen3.N/qwen3.N-catalog.log`.
 
 ## Expected Workspace Structure
 
@@ -63,9 +64,13 @@ llama-server-launcher/
 ├── README.md                      # User-facing documentation
 ├── launcher-qwen3.6.sh            # Start Qwen3.6 MTP server (port 8036)
 ├── launcher-qwen3.8.sh            # Start Qwen3.8-27B MTP server (port 8888)
+├── launcher-qwen-hybrid.sh        # Start hybrid Qwen3.6+Qwen3.8 server (port 8888)
 ├── compiler.sh                    # Build llama.cpp from source on DGX Spark
 │
 ├── launchers/                     # Preset directories — INI configs + dev docs
+│   ├── qwen-hybrid/
+│   │   └── qwen-hybrid-catalog.ini  # Hybrid preset catalog (Qwen3.6 + Qwen3.8)
+│   │
 │   ├── qwen3.6-mtp/
 │   │   ├── qwen3.6-catalog.ini    # Qwen3.6 preset catalog (single NT preset)
 │   │   ├── README.md              # Dev memory: preset values, trial notes
@@ -88,8 +93,8 @@ Currently configured with a single NT (non-thinking) preset using `Q6_K` quantiz
 ## Qwen3.8 Model Routing (Dense 27B)
 
 Currently configured with a single expert preset using `Q6_K_XL` quantization and MTP speculative decoding. Qwen3.8-27B
-  is a hybrid thinking model, so the preset follows [Unsloth recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings)
-  for its mode:
+is a hybrid thinking model, so the preset follows
+[Unsloth recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings) for its mode:
 
 | Preset | Alias | Mode | temp | top-p | presence-penalty | Use Case |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -98,10 +103,21 @@ Currently configured with a single expert preset using `Q6_K_XL` quantization an
 The preset shares `top-k=20`, `min-p=0.0`, `repeat-penalty=1.0`, and `ctx-size=262144` from the base preset defaults.
 See [qwen3.8-catalog.ini](launchers/qwen3.8-mtp/qwen3.8-catalog.ini) for full settings.
 
+## Hybrid Model Routing (Qwen3.6 + Qwen3.8)
+
+The hybrid launcher (`launcher-qwen-hybrid.sh`) runs both models on a single server using two presets from
+[qwen-hybrid-catalog.ini](launchers/qwen-hybrid/qwen-hybrid-catalog.ini). The server exposes both `qwen3.6-flash` and
+`qwen3.8-expert` model aliases via the OpenAI-compatible API.
+
+| Preset | Alias | Model | Quantization | Port |
+| --- | --- | --- | --- | --- |
+| **NT (flash)** | `qwen3.6-flash` | Qwen3.6-35B-A3B | Q6_K | 8888 |
+| **Expert** | `qwen3.8-expert` | Qwen3.8-27B | Q6_K_XL | 8888 |
+
 ## Testing OpenAI-Compatible Endpoints
 
 After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port — Qwen3.6 runs on 8036,
-  Qwen3.8 on 8888.
+Qwen3.8 and hybrid both run on 8888.
 
 ### Chat Completions
 
@@ -126,4 +142,4 @@ curl http://localhost:PORT/v1/models
 ---
 
 _Note: This directory is managed by the docs-sync skill. Manual edits should be handled with care to avoid disrupting
-  system-managed files._
+system-managed files._

@@ -6,7 +6,7 @@ One preset total (Qwen3.8-27B expert NT), inheriting from base `[ * ]` defaults 
 
 | Preset | Alias | Model | Quantization | thinking | temp | top-p | presence-penalty |
 |--------|-------|-------|--------------|----------|------|-------|-----------------|
-| Expert (NT) | `qwen3.8-expert` | 27B Dense | Q6_K_XL | off (`reasoning=off`) | 0.6 | 0.90 | 1.5 |
+| Expert (NT) | `qwen3.8-27b` | 27B Dense | Q6_K_XL | off (`reasoning=off`) | 0.6 | 0.90 | 1.5 |
 
 **Notes:**
 

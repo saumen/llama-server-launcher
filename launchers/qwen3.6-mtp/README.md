@@ -6,7 +6,7 @@ One preset total (Qwen3.6 MTP NT/flash), inheriting from base `[ * ]` defaults (
 
 | Preset | Alias | Model | Quantization | thinking | presence-penalty | temp | top-p |
 |--------|-------|-------|--------------|----------|-----------------|------|-------|
-| NT (flash) | `qwen3.6-flash` | 35B-A3B MoE | Q6_K | off (`reasoning=off`) | 1.5 | 0.7 | 0.80 |
+| NT (flash) | `qwen3.6-35b-a3b` | 35B-A3B MoE | Q6_K | off (`reasoning=off`) | 1.5 | 0.7 | 0.80 |
 
 **Notes:**
 

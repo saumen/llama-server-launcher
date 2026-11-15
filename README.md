@@ -15,7 +15,7 @@ cd /home/saumen/workspace/github/ggml-org
 bash /path/to/llama-server-launcher/compiler.sh
 ```
 
-This clones/checks out llama.cpp at a configurable tag (default `v0.3.0`), builds with CUDA, and copies binaries into
+This clones/checks out llama.cpp at a configurable tag (default `v1.0.0`), builds with CUDA, and copies binaries into
 the source tree. The build output path is printed on success.
 
 Alternatively, use a pre-built `llama-server` binary from a llama.cpp release.
@@ -46,7 +46,7 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 | Script | Description | Default Port |
 | --- | --- | --- |
 | `./launcher-qwen3.6.sh` | Qwen3.6 MTP — NT/flash preset (Q6_K quantization) | 8036 |
-| `./launcher-qwen3.8.sh` | Qwen3.8-27B MTP — expert preset (Q6_K_XL quantization) | 8888 |
+| `./launcher-qwen3.8.sh` | Qwen3.8-27B MTP — expert preset (Q6_K_M quantization) | 8888 |
 | `./launcher-qwen-hybrid.sh` | Hybrid — Qwen3.6 + Qwen3.8 in one server (two presets) | 8888 |
 | `./launcher-qwen3.5-122b-a10b.sh` | Qwen3.5-122B-A10B MTP — NT preset (Q4_K_XL quantization) | 8081 |
 
@@ -96,9 +96,9 @@ Currently configured with a single NT (non-thinking) preset using `Q6_K` quantiz
 
 ## Qwen3.8 Model Routing (Dense 27B)
 
-Currently configured with a single expert preset using `Q6_K_XL` quantization and MTP speculative decoding. Qwen3.8-27B
-is a hybrid thinking model, so the preset follows
-[Unsloth recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings) for its mode:
+Currently configured with a single expert preset using `Q6_K_M` quantization and MTP speculative decoding. Qwen3.8-27B
+is a hybrid thinking model. The expert preset keeps the proofreading sampler (`temperature=0.6`, `top-p=0.90`). That
+row is not the Unsloth instruct row:
 
 | Preset | Alias | Mode | temp | top-p | presence-penalty | Use Case |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -116,7 +116,7 @@ The hybrid launcher (`launcher-qwen-hybrid.sh`) runs both models on a single ser
 | Preset | Alias | Model | Quantization | Port |
 | --- | --- | --- | --- | --- |
 | **NT (flash)** | `qwen3.6-35b-a3b` | Qwen3.6-35B-A3B | Q6_K | 8888 |
-| **Expert** | `qwen3.8-27b` | Qwen3.8-27B | Q6_K_XL | 8888 |
+| **Expert** | `qwen3.8-27b` | Qwen3.8-27B | Q6_K_M | 8888 |
 
 ## Qwen3.5 Model Routing (MoE 122B-A10B)
 

@@ -66,7 +66,7 @@ This is a shell/INI configuration project — there is no build step or test sui
 | `./launcher-qwen3.8.sh` | Start Qwen3.8-27B MTP server on port 8888 |
 | `./launcher-qwen-hybrid.sh` | Start hybrid Qwen3.6+Qwen3.8 server on port 8888 (two presets, one server) |
 | `./launcher-qwen3.5-122b-a10b.sh` | Start Qwen3.5-122B-A10B MTP server on port 8081 (no INI, CLI flags only) |
-| `bash compiler.sh` | Build llama.cpp from source on DGX Spark (default tag v0.3.0) |
+| `bash compiler.sh` | Build llama.cpp from source on DGX Spark (default tag v1.0.0) |
 | `LLAMA_CPP_TAG=vX.Y.Z bash compiler.sh` | Build a specific llama.cpp version |
 
 ### Context-Specific Notes
@@ -153,16 +153,15 @@ Verified against `launchers/qwen3.8-mtp/qwen3.8-catalog.ini`:
 - **Base `[ * ]` defaults:** `ctx-size=262144`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `top-k=20`, `min-p=0.0`,
   `repeat-penalty=1.0`, `spec-type=draft-mtp`, `spec-draft-n-max=3`, `draft-p-min=0.50`, `spec-draft-type-k=q8_0`,
   `spec-draft-type-v=q8_0`.
-- **Expert preset (`unsloth/Qwen3.8-27B`):** The alias is `qwen3.8-27b`. The preset uses `Q6_K_XL` quantization. These
+- **Expert preset (`unsloth/Qwen3.8-27B`):** The alias is `qwen3.8-27b`. The preset uses `Q6_K_M` quantization. These
   values override the base defaults:
   `reasoning=off`, `temperature=0.6`, `top-p=0.90`, `presence-penalty=1.5`.
-- Per-mode sampling follows
-  [Unsloth Qwen3.8 recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings) (see linked docs
-  in Documentation & Planning section).
+- The expert preset is a proofreading sampler. It does not copy the Unsloth instruct row. See README.md for the
+  proofreading note and the Unsloth link.
 - Qwen3.8-27B is a dense Qwen3.5-family model with an MTP head embedded in the main GGUF — `draft-mtp` uses the in-file
   MTP module, no separate `spec-draft-model`.
 - `model` path uses the HF cache snapshot layout
-  (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/4ca720788d1e01f1bff70c033e0d0028fd02e502/`). The model does not appear
+  (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/4af51b3542f775b0a8e4b310bfb3f17e01c306c9/`). The model does not appear
   in `models.json`.
 - GPU offload is set via CLI flags in `launcher-qwen3.8.sh` (`--gpu-layers all`, `--gpu-layers-draft all`), not the INI.
 

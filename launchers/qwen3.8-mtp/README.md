@@ -6,7 +6,7 @@ One preset total (Qwen3.8-27B expert NT), inheriting from base `[ * ]` defaults 
 
 | Preset | Alias | Model | Quantization | thinking | temp | top-p | presence-penalty |
 |--------|-------|-------|--------------|----------|------|-------|-----------------|
-| Expert (NT) | `qwen3.8-27b` | 27B Dense | Q6_K_XL | off (`reasoning=off`) | 0.6 | 0.90 | 1.5 |
+| Expert (NT) | `qwen3.8-27b` | 27B Dense | Q6_K_M | off (`reasoning=off`) | 0.6 | 0.90 | 1.5 |
 
 **Notes:**
 
@@ -15,8 +15,8 @@ One preset total (Qwen3.8-27B expert NT), inheriting from base `[ * ]` defaults 
   - Instruct: `temperature=0.7`, `top-p=0.80`, `top-k=20`, `min-p=0.0`, `presence-penalty=1.5`, `repetition_penalty=1.0`
 - Current preset uses non-thinking overrides (`reasoning=off`, `temperature=0.6`, `top-p=0.90`, `presence-penalty=1.5`) that differ from both Unsloth defaults — this is an expert/proofreading profile.
 - `top-k`, `min-p`, `repeat-penalty` are identical in both modes, so they live in base `[ * ]` only
-- `model` path uses the HF cache snapshot dir (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/4ca720788d1e01f1bff70c033e0d0028fd02e502/`); the model is not in `models.json`.
-- mmproj path: `models--unsloth--Qwen3.8-27B-GGUF/snapshots/4ca720788d1e01f1bff70c033e0d0028fd02e502/mmproj-F16.gguf`
+- `model` path uses the HF cache snapshot dir (`models--unsloth--Qwen3.8-27B-GGUF/snapshots/4af51b3542f775b0a8e4b310bfb3f17e01c306c9/`); the model is not in `models.json`.
+- mmproj path: `models--unsloth--Qwen3.8-27B-GGUF/snapshots/4af51b3542f775b0a8e4b310bfb3f17e01c306c9/mmproj-F16.gguf`
 
 ## MTP configuration
 

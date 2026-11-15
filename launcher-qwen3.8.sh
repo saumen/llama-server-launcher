@@ -14,6 +14,8 @@ log_dir="/tmp/${DATE}-llama-qwen3.8"
 mkdir -p "${log_dir}"
 preset='qwen3.8-catalog'
 
+echo "LLAMA_SERVER_BIN = ${LLAMA_SERVER_BIN}"
+
 "${LLAMA_SERVER_BIN}" \
 	--models-preset "$SCRIPT_DIR/launchers/qwen3.8-mtp/${preset}.ini" \
 	--host 0.0.0.0 \

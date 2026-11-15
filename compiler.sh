@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Configuration ---------------------------------------------------------- #
-LLAMA_CPP_TAG="${LLAMA_CPP_TAG:-v0.3.0}"
+LLAMA_CPP_TAG="${LLAMA_CPP_TAG:-v1.0.0}"
 BASE_DIR="${HOME}/workspace/github/ggml-org"
 
 # Ensure CUDA is on PATH (not set in SSH login by default)

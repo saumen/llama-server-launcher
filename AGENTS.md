@@ -12,6 +12,7 @@ them.
 | [`launchers/qwen3.6-mtp/README.md`](launchers/qwen3.6-mtp/README.md) | Developers | Qwen3.6 catalog preset memory: config values, inheritance, trial notes |
 | [`launchers/qwen3.6-mtp/docs/qwen3.6-recommendations.md`](launchers/qwen3.6-mtp/docs/qwen3.6-recommendations.md) | Developers | Cached official Qwen3.6 recommended settings from HuggingFace |
 | [`launchers/qwen3.8-mtp/README.md`](launchers/qwen3.8-mtp/README.md) | Developers | Qwen3.8 catalog preset memory: config values, per-mode settings |
+| [`launchers/inkling-2-mini/README.md`](launchers/inkling-2-mini/README.md) | Developers | Inkling 2 Mini catalog memory: binary, DSpark, paths |
 | [`launchers/qwen-hybrid/qwen-hybrid-catalog.ini`](launchers/qwen-hybrid/qwen-hybrid-catalog.ini) | Developers | Hybrid catalog: combined Qwen3.6 + Qwen3.8 presets + base defaults |
 | [`.markdownlint.json`](.markdownlint.json) | All developers | Markdown lint config: line length 120, compact style, allowed `<br/>` |
 
@@ -33,6 +34,7 @@ llama-server-launcher/
 ├── launcher-qwen3.8.sh        # Root launcher: Qwen3.8-27B MTP server on port 8888
 ├── launcher-qwen-hybrid.sh    # Root launcher: hybrid Qwen3.6+Qwen3.8 server on port 8888
 ├── launcher-qwen3.5-122b-a10b.sh # Standalone launcher: Qwen3.5-122B-A10B on port 8081, CLI flags only
+├── launcher-inkling-2-mini.sh # Root launcher: Inkling 2 Mini on port 8888, Unsloth sibling binary
 ├── compiler.sh                # Build llama.cpp from source on DGX Spark
 │
 ├── launchers/
@@ -45,9 +47,13 @@ llama-server-launcher/
 │   │   └── docs/
 │   │       └── qwen3.6-recommendations.md # Cached official Qwen settings
 │   │
-│   └── qwen3.8-mtp/
-│       ├── README.md          # Dev memory: catalog preset values, per-mode settings
-│       └── qwen3.8-catalog.ini # INI preset catalog: 1 Qwen3.8 expert preset + base defaults
+│   ├── qwen3.8-mtp/
+│   │   ├── README.md          # Dev memory: catalog preset values, per-mode settings
+│   │   └── qwen3.8-catalog.ini # INI preset catalog: 1 Qwen3.8 expert preset + base defaults
+│   │
+│   └── inkling-2-mini/
+│       ├── README.md          # Dev memory: binary, DSpark, paths
+│       └── inkling-2-mini-catalog.ini # Two presets: UD-Q8_K_XL and UD-Q4_K_XL
 ```
 
 **Note:** The following items were removed in a refactor and are no longer present:
@@ -66,6 +72,7 @@ This is a shell/INI configuration project — there is no build step or test sui
 | `./launcher-qwen3.8.sh` | Start Qwen3.8-27B MTP server on port 8888 |
 | `./launcher-qwen-hybrid.sh` | Start hybrid Qwen3.6+Qwen3.8 server on port 8888 (two presets, one server) |
 | `./launcher-qwen3.5-122b-a10b.sh` | Start Qwen3.5-122B-A10B MTP server on port 8081 (no INI, CLI flags only) |
+| `./launcher-inkling-2-mini.sh` | Start Inkling 2 Mini server on port 8888 (two presets, one load at a time) |
 | `bash compiler.sh` | Build llama.cpp from source on DGX Spark (default tag v1.0.0) |
 | `LLAMA_CPP_TAG=vX.Y.Z bash compiler.sh` | Build a specific llama.cpp version |
 
@@ -99,6 +106,7 @@ This is a shell/INI configuration project — there is no build step or test sui
 
 - [Qwen3.6 official recommended settings](launchers/qwen3.6-mtp/docs/qwen3.6-recommendations.md)
 - [Unsloth Qwen3.8 recommended settings](https://unsloth.ai/docs/models/qwen3.8#recommended-settings)
+- [Unsloth Inkling 2 Mini guide](https://unsloth.ai/docs/models/inkling-2-mini)
 - [llama.cpp preset docs](https://github.com/ggml-org/llama.cpp/blob/master/docs/preset.md)
 - [llama.cpp speculative decoding docs](https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md)
 
@@ -106,8 +114,8 @@ This is a shell/INI configuration project — there is no build step or test sui
 
 ### Before modifying code
 
-1. Read the relevant INI catalog (`qwen3.6-catalog.ini`, `qwen3.8-catalog.ini`, or `qwen-hybrid-catalog.ini`) to
-   understand preset inheritance from the `[ * ]` base defaults.
+1. Read the relevant INI catalog (`qwen3.6-catalog.ini`, `qwen3.8-catalog.ini`, `qwen-hybrid-catalog.ini`, or
+   `inkling-2-mini-catalog.ini`) to understand preset inheritance from the `[ * ]` base defaults.
 2. Read the corresponding launcher script to understand CLI flags set outside the INI (e.g., `--gpu-layers all` is set
    in the launcher scripts, not the INI).
 3. Before you change model tiers, read the routing docs for benchmark data and decision rationale.
@@ -129,7 +137,8 @@ This is a shell/INI configuration project — there is no build step or test sui
 Section names follow the pattern `[unsloth/<model-name>]` for MTP models.
 
 - `alias` field defines the model name exposed via the API.
-- `model` and `mmproj` paths are absolute. Do not use `spec-draft-model` (the MTP head is in-file).
+- `model` and `mmproj` paths are absolute. Do not use `spec-draft-model` for MTP models (the MTP head is in-file).
+- Inkling 2 Mini uses `spec-type = draft-dspark` and `spec-draft-n-max = 3`. Do not set `draft-mtp`.
 
 ## Domain-Specific Guidelines
 
@@ -189,3 +198,25 @@ Verified against `launcher-qwen3.5-122b-a10b.sh`:
 - Runs on port 8081. Sampling: `temp=0.7`, `top-p=0.80`, `top-k=20`, `min-p=0.0`, `presence-penalty=1.5`.
 - MTP: `spec-type=draft-mtp`, `spec-draft-n-max=2` (not 3 like the INI catalogs), `spec-draft-p-min=0.50`.
 - `ctx-size=200000`, `cache-type-k/v=q8_0`, `reasoning off`, `--log-verbosity 4`. No `--metrics` flag.
+
+### Inkling 2 Mini Catalog (`inkling-2-mini-catalog.ini`)
+
+Verified against `launchers/inkling-2-mini/inkling-2-mini-catalog.ini`:
+
+- **Base `[ * ]` defaults:** `ctx-size=262144`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `temperature=1.0`,
+  `top-p=1.0`, `top-k=0`, `min-p=0.0`, `spec-type=draft-dspark`, `spec-draft-n-max=3`. The base also sets
+  `model-draft` and `mmproj`. Both presets inherit those paths.
+- **UD-Q8_K_XL preset (`unsloth/Inkling-2-Mini-UD-Q8_K_XL`):** The alias is `inkling-2-mini-ud-q8-k-xl`. The file is
+  `Inkling-2-Mini-UD-Q8_K_XL.gguf`.
+- **UD-Q4_K_XL preset (`unsloth/Inkling-2-Mini-UD-Q4_K_XL`):** The alias is `inkling-2-mini-ud-q4-k-xl`. The file is
+  `Inkling-2-Mini-UD-Q4_K_XL.gguf`.
+- Paths use the flat cache layout `/home/saumen/.cache/huggingface/hub/unsloth/Inkling-2-Mini-GGUF/`. Do not point
+  `model` at `Mainline_Support` files.
+- The launcher does not use `LLAMA_SERVER_BIN`. Mainline llama.cpp cannot read these GGUFs yet. The script pins the
+  Unsloth sibling `/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server`.
+  The directory name follows the `compiler.sh` pattern `YYYY-MM-DD-tag`.
+- The launcher binds port 8888. It does not stop other processes. `--models-max 1` lists both aliases and loads one
+  model per request.
+- GPU offload is set in `launcher-inkling-2-mini.sh` (`--gpu-layers all`, `--gpu-layers-draft all`, `--device CUDA0`),
+  not in the INI. The script does not set `--spec-draft-device`. The drafter must use the same device as the target.
+- The catalog does not set `reasoning`. Unsloth sampling has no presence penalty and no repeat penalty.

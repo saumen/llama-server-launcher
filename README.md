@@ -49,11 +49,12 @@ Run one of the launcher scripts below to start `llama-server` with pre-configure
 | `./launcher-qwen3.8.sh` | Qwen3.8-27B MTP — expert preset (Q6_K_M quantization) | 8888 |
 | `./launcher-qwen-hybrid.sh` | Hybrid — Qwen3.6 + Qwen3.8 in one server (two presets) | 8888 |
 | `./launcher-qwen3.5-122b-a10b.sh` | Qwen3.5-122B-A10B MTP — NT preset (Q4_K_XL quantization) | 8081 |
+| `./launcher-inkling-2-mini.sh` | Inkling 2 Mini — UD-Q8_K_XL and UD-Q4_K_XL presets | 8888 |
 
-The first three launchers load settings from an INI preset catalog. The Qwen3.5-122B launcher passes all settings as
-command-line flags instead. All four launchers run on `0.0.0.0`, use flash attention, continuous batching, the Jinja
-chat template, and full GPU offload. The first three also emit Prometheus metrics (`--metrics`). Logs go to
-`/tmp/YYYY-MM-DD-llama-<model>/<name>.log`.
+The Qwen3.6, Qwen3.8, hybrid, and Inkling launchers load settings from an INI preset catalog. The Qwen3.5-122B launcher
+passes all settings as command-line flags instead. All five launchers run on `0.0.0.0`, use flash attention, continuous
+batching, the Jinja chat template, and full GPU offload. The INI launchers also emit Prometheus metrics (`--metrics`).
+Logs go to `/tmp/YYYY-MM-DD-llama-<model>/<name>.log`.
 
 ## Expected Workspace Structure
 
@@ -69,6 +70,7 @@ llama-server-launcher/
 ├── launcher-qwen3.8.sh            # Start Qwen3.8-27B MTP server (port 8888)
 ├── launcher-qwen-hybrid.sh        # Start hybrid Qwen3.6+Qwen3.8 server (port 8888)
 ├── launcher-qwen3.5-122b-a10b.sh  # Start Qwen3.5-122B-A10B MTP server (port 8081, CLI flags only)
+├── launcher-inkling-2-mini.sh     # Start Inkling 2 Mini server (port 8888, two presets)
 ├── compiler.sh                    # Build llama.cpp from source on DGX Spark
 │
 ├── launchers/                     # Preset directories — INI configs + dev docs
@@ -81,9 +83,13 @@ llama-server-launcher/
 │   │   └── docs/
 │   │       └── qwen3.6-recommendations.md    # Cached official Qwen3.6 settings
 │   │
-│   └── qwen3.8-mtp/
-│       ├── qwen3.8-catalog.ini    # Qwen3.8-27B preset catalog (single expert preset)
-│       ├── README.md              # Dev memory: preset values, per-mode settings
+│   ├── qwen3.8-mtp/
+│   │   ├── qwen3.8-catalog.ini    # Qwen3.8-27B preset catalog (single expert preset)
+│   │   └── README.md              # Dev memory: preset values, per-mode settings
+│   │
+│   └── inkling-2-mini/
+│       ├── inkling-2-mini-catalog.ini  # Two Inkling 2 Mini presets (UD-Q8_K_XL, UD-Q4_K_XL)
+│       └── README.md              # Dev memory: binary, DSpark, paths
 ```
 
 ## Qwen3.6 Model Routing (MoE 35B-A3B)
@@ -131,10 +137,42 @@ The launcher hardcodes all settings as command-line flags. There is no INI catal
 `--spec-draft-n-max 2` for MTP speculation, `ctx-size 200000`, and a multi-part `Q4_K_XL` GGUF split. The launcher does
 not pass `--metrics`.
 
+## Inkling 2 Mini (DGX Spark)
+
+`./launcher-inkling-2-mini.sh` starts one Inkling 2 Mini server on port 8888. The catalog lists two presets. The server
+loads one preset at a time.
+
+| Preset | Alias | Quantization |
+| --- | --- | --- |
+| UD-Q8_K_XL | `inkling-2-mini-ud-q8-k-xl` | UD-Q8_K_XL |
+| UD-Q4_K_XL | `inkling-2-mini-ud-q4-k-xl` | UD-Q4_K_XL |
+
+The script does not download model files. The script does not stop other servers.
+Mainline llama.cpp cannot read these GGUFs yet. The script uses the Unsloth sibling binary, not `LLAMA_SERVER_BIN`.
+
+The binary is `/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server`.
+Install steps are in [launchers/inkling-2-mini/README.md](launchers/inkling-2-mini/README.md).
+Source: [Unsloth DGX Spark build](https://unsloth.ai/docs/models/inkling-2-mini#dgx-spark).
+
+Run the download on DGX Spark before you start the launcher. The preset paths are absolute. A download without the
+drafter file fails at start.
+
+```bash
+hf download unsloth/Inkling-2-Mini-GGUF \
+    Inkling-2-Mini-UD-Q8_K_XL.gguf \
+    Inkling-2-Mini-UD-Q4_K_XL.gguf \
+    mmproj-F16.gguf \
+    dspark-Inkling-2-Mini-Q8_0.gguf \
+    --local-dir /home/saumen/.cache/huggingface/hub/unsloth/Inkling-2-Mini-GGUF
+```
+
+Do not download the `Mainline_Support` files. Do not download the `dspark/` BF16 drafter. The catalog uses the root
+`Q8_0` drafter.
+
 ## Testing OpenAI-Compatible Endpoints
 
-After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port — Qwen3.6 runs on 8036,
-Qwen3.8 and hybrid run on 8888, and Qwen3.5-122B runs on 8081.
+After launching a server, test its endpoints with `curl`. Replace `PORT` with the actual port. Qwen3.6 runs on 8036.
+Qwen3.8, hybrid, and Inkling 2 Mini run on 8888. Qwen3.5-122B runs on 8081.
 
 ### Chat Completions
 

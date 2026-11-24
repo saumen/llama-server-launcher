@@ -138,7 +138,8 @@ Section names follow the pattern `[unsloth/<model-name>]` for MTP models.
 
 - `alias` field defines the model name exposed via the API.
 - `model` and `mmproj` paths are absolute. Do not use `spec-draft-model` for MTP models (the MTP head is in-file).
-- Inkling 2 Mini uses `spec-type = draft-dspark` and `spec-draft-n-max = 3`. Do not set `draft-mtp`.
+- Inkling 2 Mini uses `spec-type = draft-dspark` and `spec-draft-n-max = 2`. Do not set `draft-mtp`.
+  The root `Q8_0` drafter uses depth 2. `Mainline_Support` uses depth 3.
 
 ## Domain-Specific Guidelines
 
@@ -204,7 +205,7 @@ Verified against `launcher-qwen3.5-122b-a10b.sh`:
 Verified against `launchers/inkling-2-mini/inkling-2-mini-catalog.ini`:
 
 - **Base `[ * ]` defaults:** `ctx-size=262144`, `cache-type-k=q8_0`, `cache-type-v=q8_0`, `temperature=1.0`,
-  `top-p=1.0`, `top-k=0`, `min-p=0.0`, `spec-type=draft-dspark`, `spec-draft-n-max=3`. The base also sets
+  `top-p=1.0`, `top-k=0`, `min-p=0.0`, `spec-type=draft-dspark`, `spec-draft-n-max=2`. The base also sets
   `model-draft` and `mmproj`. Both presets inherit those paths.
 - **UD-Q8_K_XL preset (`unsloth/Inkling-2-Mini-UD-Q8_K_XL`):** The alias is `inkling-2-mini-ud-q8-k-xl`. The file is
   `Inkling-2-Mini-UD-Q8_K_XL.gguf`.
@@ -212,9 +213,10 @@ Verified against `launchers/inkling-2-mini/inkling-2-mini-catalog.ini`:
   `Inkling-2-Mini-UD-Q4_K_XL.gguf`.
 - Paths use the flat cache layout `/home/saumen/.cache/huggingface/hub/unsloth/Inkling-2-Mini-GGUF/`. Do not point
   `model` at `Mainline_Support` files.
-- The launcher does not use `LLAMA_SERVER_BIN`. Mainline llama.cpp cannot read these GGUFs yet. The script pins the
-  Unsloth sibling `/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server`.
-  The directory name follows the `compiler.sh` pattern `YYYY-MM-DD-tag`.
+- The launcher sources `.env.launcher` but overwrites `LLAMA_SERVER_BIN` with the Unsloth sibling, so the
+  `.env.launcher` value is ignored. The 23 Nov quants load in mainline llama.cpp. The script still pins
+  the Unsloth sibling `/home/saumen/workspace/github/ggml-org/2026-11-23-b12649-mix-c7059d6/llama.cpp/llama-server`.
+  That build decodes faster. The directory name follows the `compiler.sh` pattern `YYYY-MM-DD-tag`.
 - The launcher binds port 8888. It does not stop other processes. `--models-max 1` lists both aliases and loads one
   model per request.
 - GPU offload is set in `launcher-inkling-2-mini.sh` (`--gpu-layers all`, `--gpu-layers-draft all`, `--device CUDA0`),

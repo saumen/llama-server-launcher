@@ -148,14 +148,17 @@ loads one preset at a time.
 | UD-Q4_K_XL | `inkling-2-mini-ud-q4-k-xl` | UD-Q4_K_XL |
 
 The script does not download model files. The script does not stop other servers.
-Mainline llama.cpp cannot read these GGUFs yet. The script uses the Unsloth sibling binary, not `LLAMA_SERVER_BIN`.
+The 23 Nov quants load in mainline llama.cpp. The script sources `.env.launcher` but overwrites `LLAMA_SERVER_BIN`
+with the Unsloth sibling binary, so the `.env.launcher` value is ignored. That build decodes faster.
 
-The binary is `/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server`.
+The binary is `/home/saumen/workspace/github/ggml-org/2026-11-23-b12649-mix-c7059d6/llama.cpp/llama-server`.
 Install steps are in [launchers/inkling-2-mini/README.md](launchers/inkling-2-mini/README.md).
-Source: [Unsloth DGX Spark build](https://unsloth.ai/docs/models/inkling-2-mini#dgx-spark).
+Source: [23 Nov update](https://unsloth.ai/docs/models/inkling-2-mini#id-23rd-november-update).
+The DGX Spark asset is on [the DGX Spark tab](https://unsloth.ai/docs/models/inkling-2-mini#dgx-spark).
 
 Run the download on DGX Spark before you start the launcher. The preset paths are absolute. A download without the
-drafter file fails at start.
+drafter file fails at start. Unsloth replaced these GGUF files on 23 Nov 2026. If the local files are older than
+that date, download them again.
 
 ```bash
 hf download unsloth/Inkling-2-Mini-GGUF \

@@ -3,7 +3,7 @@
 ## Catalog presets (inkling-2-mini-catalog.ini)
 
 Two presets inherit from base `[ * ]` defaults (`ctx-size=262144`, `cache-type-k=q8_0`, `cache-type-v=q8_0`,
-`temperature=1.0`, `top-p=1.0`, `top-k=0`, `min-p=0.0`, `spec-type=draft-dspark`, `spec-draft-n-max=3`).
+`temperature=1.0`, `top-p=1.0`, `top-k=0`, `min-p=0.0`, `spec-type=draft-dspark`, `spec-draft-n-max=2`).
 
 | Preset | Alias | Quant | File |
 | --- | --- | --- | --- |
@@ -14,24 +14,26 @@ The shared files are `mmproj-F16.gguf` and `dspark-Inkling-2-Mini-Q8_0.gguf`. Bo
 
 ## Binary
 
-Mainline llama.cpp cannot read these GGUFs yet. The launcher does not use `LLAMA_SERVER_BIN`. It uses the Unsloth
-sibling binary. The directory name follows the `compiler.sh` pattern `YYYY-MM-DD-tag/llama.cpp/llama-server`.
+The 23 Nov quants load in mainline llama.cpp. The launcher sources `.env.launcher` but overwrites `LLAMA_SERVER_BIN`
+with the Unsloth sibling binary, so the `.env.launcher` value is ignored. That build decodes faster and supports both
+DSpark layouts. The directory name follows the `compiler.sh` pattern `YYYY-MM-DD-tag/llama.cpp/llama-server`.
 
 Installed path:
 
-`/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server`
+`/home/saumen/workspace/github/ggml-org/2026-11-23-b12649-mix-c7059d6/llama.cpp/llama-server`
 
-The build is Unsloth `b12588-mix-c0c3de8`, version `1.0.0-dev` build `12588`, commit `883286076`. Source:
-[Unsloth DGX Spark build](https://unsloth.ai/docs/models/inkling-2-mini#dgx-spark).
+The build is Unsloth `b12649-mix-c7059d6`, version `1.0.0-dev` build `12649`, commit `189f431bf`. Source:
+[23 Nov update](https://unsloth.ai/docs/models/inkling-2-mini#id-23rd-november-update).
+The DGX Spark asset is on [the DGX Spark tab](https://unsloth.ai/docs/models/inkling-2-mini#dgx-spark).
 
 Run this on DGX Spark. The extract keeps `llama-server` and its libraries together. The script does not start the
 server. The script does not stop other servers.
 
 ```bash
-BASE=/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8
+BASE=/home/saumen/workspace/github/ggml-org/2026-11-23-b12649-mix-c7059d6
 mkdir -p "${BASE}/llama.cpp"
 curl -fL -o "${BASE}/llama.tar.gz" \
-    https://github.com/unslothai/llama.cpp/releases/download/b12588-mix-c0c3de8/app-b12588-mix-c0c3de8-linux-arm64-cuda13-portable.tar.gz
+    https://github.com/unslothai/llama.cpp/releases/download/b12649-mix-c7059d6/app-b12649-mix-c7059d6-linux-arm64-cuda13-portable.tar.gz
 tar -xzf "${BASE}/llama.tar.gz" -C "${BASE}/llama.cpp"
 "${BASE}/llama.cpp/llama-server" --version
 rm -f "${BASE}/llama.tar.gz"
@@ -39,8 +41,9 @@ rm -f "${BASE}/llama.tar.gz"
 
 ## Speculation
 
-The catalog uses `spec-type = draft-dspark` and `spec-draft-n-max = 3`. The drafter is the root file
-`dspark-Inkling-2-Mini-Q8_0.gguf`. The INI key is `model-draft`. Do not set `spec-type` to `draft-mtp`.
+The catalog uses `spec-type = draft-dspark` and `spec-draft-n-max = 2`. Depth 2 is fastest for the root
+`Q8_0` drafter on this build. The drafter is the root file `dspark-Inkling-2-Mini-Q8_0.gguf`. The INI key is
+`model-draft`. Do not set `spec-type` to `draft-mtp`. `Mainline_Support` uses depth 3.
 
 The launcher offloads the draft with `--gpu-layers-draft all`. It does not set `--spec-draft-device`. The drafter
 borrows the target embeddings, so it must use the same device as the target.
@@ -53,7 +56,8 @@ processes. `--models-max 1` lists both aliases and loads one model per request.
 ## Download
 
 Run this on DGX Spark before you start the launcher. The preset paths are absolute. A download to another directory
-does not load. A download without `dspark-Inkling-2-Mini-Q8_0.gguf` fails at start.
+does not load. A download without `dspark-Inkling-2-Mini-Q8_0.gguf` fails at start. Unsloth replaced these GGUF
+files on 23 Nov 2026. If the local files are older than that date, download them again.
 
 ```bash
 hf download unsloth/Inkling-2-Mini-GGUF \

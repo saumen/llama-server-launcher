@@ -14,12 +14,14 @@ if [ -f "${SCRIPT_DIR}/.env.launcher" ]; then
 	source "${SCRIPT_DIR}/.env.launcher"
 fi
 
-# Mainline llama.cpp cannot read these GGUFs yet.
+# 23 Nov update: https://unsloth.ai/docs/models/inkling-2-mini#id-23rd-november-update
+# Mainline can load the updated quants. This script still pins the faster Unsloth build.
 # Sibling of the mainline build. Same naming pattern as compiler.sh.
-LLAMA_SERVER_BIN="/home/saumen/workspace/github/ggml-org/2026-11-22-b12588-mix-c0c3de8/llama.cpp/llama-server"
+LLAMA_SERVER_BIN="/home/saumen/workspace/github/ggml-org/2026-11-23-b12649-mix-c7059d6/llama.cpp/llama-server"
 
 if [ ! -x "${LLAMA_SERVER_BIN}" ]; then
 	echo "Error: Unsloth llama-server is not executable: ${LLAMA_SERVER_BIN}" >&2
+	echo "Install b12649-mix-c7059d6 from the 23 Nov Unsloth release before you start this script." >&2
 	exit 1
 fi
 
